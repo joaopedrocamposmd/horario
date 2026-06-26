@@ -714,8 +714,8 @@ function calcScenario(scKey) {
           privadoRemun8Sem += block.duration * getPrivateRate(block.type);
           return;
         }
-        if (block.type === 'folga') { folgaUsed += 1; return; }
-        if (block.type === 'dc') { dcCount += 1; return; }
+        if (block.type === 'folga') { folgaUsed += 1; totalRealH += Math.min(block.duration || 0, 8); return; } // folga conta como tempo de trabalho em TODOS os cenários (máx 8h)
+        if (block.type === 'dc') { dcCount += 1; if (!sc.hasDP) totalRealH += (block.duration || 0); return; } // DC conta como tempo de trabalho só FORA da Dedicação Plena
         if (meta.isSU) {
           // Folga: só horas de SU extra (su-extra) que caem no domingo contam.
           // Somam-se entre blocos do mesmo domingo (chave = semana, di=6); 1 folga se o total >=4h.
@@ -1911,6 +1911,9 @@ function renderModal() {
       document.getElementById('add-start').value = d.startTime;
       document.getElementById('add-dur').value = d.duration;
     }
+    const durInput = document.getElementById('add-dur');
+    durInput.max = e.target.value === 'folga' ? '8' : '24'; // folga: duração máxima 8h
+    if (e.target.value === 'folga' && parseFloat(durInput.value) > 8) durInput.value = '8';
   });
 
   // Add/Save button
@@ -1919,7 +1922,8 @@ function renderModal() {
     const startTime = document.getElementById('add-start').value;
     const dur = parseFloat(document.getElementById('add-dur').value);
     if (!type || !startTime || !(dur > 0)) return;
-    const duration = Math.round(dur * 4) / 4;
+    let duration = Math.round(dur * 4) / 4;
+    if (type === 'folga') duration = Math.min(duration, 8); // folga: duração máxima 8h
     const block = { type, startTime, duration };
     const cs = state.currentScenario;
     if (isEdit) {
