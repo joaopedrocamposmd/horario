@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador horário · 2026</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%233b877b'/%3E%3Cpath d='M28 30 V50 C28 75 40 82 50 82 C60 82 72 75 72 50 V30' stroke='white' stroke-width='12' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='28' cy='30' r='8' fill='white'/%3E%3Ccircle cx='50' cy='82' r='8' fill='white'/%3E%3Ccircle cx='72' cy='30' r='8' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Brand core */
+  --color-primary: #3b877b;
+  --color-primary-dark: #2a6058;
+
+  /* Surfaces & ink */
+  --bg: #f4f7f6;
+  --bg-tint: #eef3f1;
+  --paper: #ffffff;
+  --ink: #2c3e50;
+  --ink-soft: #46555f;
+  --ink-muted: #7a8a86;
+  --rule: #dfe6e3;
+  --rule-soft: #edf1ef;
+
+  /* Glassmorphism */
+  --surface-glass: rgba(255, 255, 255, 0.72);
+  --surface-border: rgba(255, 255, 255, 0.60);
+  --blur-amount: 12px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Roboto Mono', monospace;
+
+  /* Block-type families */
+  --consulta: #2a6058;
+  --ecografia: #4f9b8c;
+  --bloco: #34568a;
+  --reuniao: #6c7a88;
+  --trabna: #566069;
+  --urgencia: #e67e22;
+  --su-extra: #c75f1c;
+  --privado: #c8932f;
+  --privado-eco: #a87a24;
+  --dc: #9aa0a6;
+  --folga: #3fb87a;
+  --lazer: #8b76b0;
+
+  /* Semantic */
+  --pos: #2ecc71;
+  --neg: #c75f1c;
+  --warn: #e67e22;
+
+  /* Scenario anchors */
+  --sc-a: #3b877b;
+  --sc-b: #2c3e50;
+  --sc-c: #4a6d8a;
+  --sc: var(--urgencia);
+
+  /* Shadows (tinted, never pure black) */
+  --shadow-md: 0 8px 24px -10px rgba(59, 135, 123, 0.30);
+  --shadow-lg: 0 20px 50px -20px rgba(44, 62, 80, 0.35);
+}
+.scope-A { --sc: var(--sc-a); }
+.scope-B { --sc: var(--sc-b); }
+.scope-C { --sc: var(--sc-c); }
+
+#scoped-section { padding: 20px 18px; margin: 0 -16px 24px; transition: background-color 0.25s ease, border-color 0.25s ease; position: relative; border-left: 4px solid transparent; }
+#scoped-section.scope-A { background-color: rgba(59, 135, 123, 0.10); border-left-color: var(--sc-a); }
+#scoped-section.scope-B { background-color: rgba(44, 62, 80, 0.08); border-left-color: var(--sc-b); }
+#scoped-section.scope-C { background-color: rgba(74, 109, 138, 0.10); border-left-color: var(--sc-c); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(59, 135, 123, 0.10), transparent 45%),
+    radial-gradient(circle at 90% 100%, rgba(44, 62, 80, 0.08), transparent 45%);
+  min-height: 100vh;
+}
+.wrap { max-width: 1400px; margin: 0 auto; padding: 24px 16px 60px; }
+header { margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--rule); position: relative; }
+header::before { content: ""; position: absolute; bottom: -1px; left: 0; width: 70px; height: 3px; background: var(--color-primary); }
+.brand { display: inline-block; margin-bottom: 16px; line-height: 0; }
+.brand-logo { height: 34px; width: auto; display: block; }
+.eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 14px; }
+h1 { font-family: 'Inter', sans-serif; font-weight: 400; font-size: clamp(32px, 5vw, 56px); line-height: 0.98; letter-spacing: -0.03em; margin-bottom: 12px; }
+h1 em { font-style: normal; font-weight: 600; color: var(--color-primary); }
+.lede { font-family: 'Inter', sans-serif; font-weight: 300; font-size: clamp(14px, 1.5vw, 16px); line-height: 1.55; color: var(--ink-soft); max-width: 720px; font-style: italic; }
+.config { background: var(--surface-glass); -webkit-backdrop-filter: blur(var(--blur-amount)); backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--surface-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 20px 22px; margin-bottom: 24px; }
+.priv-types-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.priv-type-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--bg-tint); border: 1px solid var(--rule-soft); border-radius: var(--radius-sm); flex-wrap: wrap; }
+.priv-type-label { flex: 1; min-width: 120px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink-soft); }
+.priv-type-label-input { flex: 1; min-width: 120px; background: var(--bg); border: 1px solid var(--rule); padding: 7px 10px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink); border-radius: var(--radius-sm); min-height: 35px; }
+.priv-type-rate { display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-muted); }
+.priv-type-rate input { padding: 7px 10px; border: 1px solid var(--rule); background: var(--bg); font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right; border-radius: var(--radius-sm); min-height: 35px; }
+.priv-type-del { background: transparent; border: 1px solid var(--rule); color: var(--ink-muted); width: 35px; height: 35px; font-size: 16px; cursor: pointer; padding: 0; line-height: 1; border-radius: var(--radius-sm); }
+.priv-type-del:hover { background: var(--paper); color: #e67e22; border-color: #e67e22; }
+.io-section { background: var(--surface-glass); -webkit-backdrop-filter: blur(var(--blur-amount)); backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--surface-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 20px 22px; margin: 32px 0 0; }
+.io-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.io-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); font-weight: 500; }
+.io-label small { text-transform: none; letter-spacing: 0; font-family: Inter, sans-serif; font-style: italic; font-size: 11px; }
+.io-section textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--rule); background: var(--bg-tint); font-family: Inter, sans-serif; font-size: 14px; color: var(--ink); resize: vertical; min-height: 60px; font-style: italic; box-sizing: border-box; border-radius: var(--radius-sm); }
+.io-section textarea:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(59, 135, 123, 0.15); background: var(--paper); }
+.io-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.config-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); }
+.field select, .field input[type="text"], .field input[type="number"], .field input[type="time"] {
+  background: var(--bg); border: 1px solid var(--rule); padding: 7px 10px; font-family: inherit; font-size: 14px; color: var(--ink); border-radius: var(--radius-sm); min-height: 35px;
+}
+.field select:focus, .field input:focus, .priv-type-label-input:focus, .priv-type-rate input:focus, .add-fields > *:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(59, 135, 123, 0.15); }
+.toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; background: var(--bg); border: 1px solid var(--rule); border-radius: var(--radius-sm); padding: 6px 10px; font-size: 13px; min-height: 35px; white-space: nowrap; overflow: hidden; transition: border-color 0.15s ease; }
+.toggle:hover { border-color: var(--ink-soft); }
+.field label.toggle { text-transform: none; letter-spacing: normal; font-family: var(--font-sans); font-size: 13px; color: var(--ink); }
+.toggle input { width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-primary); flex-shrink: 0; }
+.config-summary { padding-top: 14px; margin-top: 14px; border-top: 1px dashed var(--rule); display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-soft); }
+.config-summary strong { color: var(--ink); font-weight: 600; }
+.help-text { font-size: 11px; color: var(--ink-muted); font-style: italic; font-family: 'Inter', sans-serif; margin-top: 4px; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+@media (max-width: 640px) { .tabs { grid-template-columns: 1fr; } }
+.tab { background: var(--surface-glass); -webkit-backdrop-filter: blur(var(--blur-amount)); backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--surface-border); border-radius: var(--radius-md); padding: 14px 18px; cursor: pointer; text-align: left; font-family: inherit; color: inherit; position: relative; transition: all 0.15s ease; width: 100%; box-shadow: var(--shadow-md); }
+.tab:hover { border-color: var(--ink-soft); }
+.tab.active { border-color: var(--ink); border-width: 2px; padding: 13px 17px; box-shadow: var(--shadow-md); }
+.tab.active::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--sc); border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.tab.status-warn::after, .tab.active.status-warn::after { background: var(--warn); }
+.tab.status-err::after, .tab.active.status-err::after { background: var(--neg); }
+.tab-letter { font-family: 'Inter', sans-serif; font-style: italic; font-weight: 300; font-size: 38px; line-height: 1; color: var(--sc); display: block; margin-bottom: 2px; }
+.tab-name { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 4px; }
+.tab-meta { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--ink-muted); letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.4; }
+.tab-status { font-family: 'IBM Plex Mono', monospace; font-size: 10px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--rule); display: flex; gap: 12px; flex-wrap: wrap; }
+.tab-status .item { color: var(--ink-soft); }
+.tab-status .item.ok { color: var(--pos); }
+.tab-status .item.warn { color: var(--warn); }
+.tab-status .item.err { color: var(--neg); }
+.tab-status .item strong { font-weight: 700; }
+.section-title { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 14px; display: flex; align-items: center; gap: 12px; }
+.section-title::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+.scope-A .section-title::after, .scope-B .section-title::after, .scope-C .section-title::after { background: var(--sc); opacity: 0.5; }
+.section-title small { font-size: 10px; color: var(--ink-muted); font-weight: 400; letter-spacing: 0.1em; }
+.calendar { background: var(--surface-glass); -webkit-backdrop-filter: blur(var(--blur-amount)); backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--surface-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); margin-bottom: 24px; overflow: auto; }
+.cal-grid { display: grid; grid-template-columns: 56px repeat(7, 1fr); min-width: 720px; }
+.cal-header { background: var(--bg-tint); font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); padding: 10px 6px; text-align: center; border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule-soft); font-weight: 500; }
+.cal-header.weekend { color: var(--urgencia); }
+.cal-wknum { font-family: 'Inter', sans-serif; background: var(--bg-tint); border-right: 1px solid var(--rule); border-bottom: 2px solid rgba(44, 62, 80, 0.22); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 2px; }
+.cal-wknum .wknum-label { font-style: italic; font-weight: 400; font-size: 22px; color: var(--sc); line-height: 1; }
+.cal-wknum .wk-btns { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.wk-btn { background: transparent; border: 1px solid var(--rule); font-family: inherit; font-size: 12px; padding: 0; width: 26px; height: 22px; cursor: pointer; color: var(--ink-muted); line-height: 1; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; transition: all 0.1s ease; -webkit-tap-highlight-color: rgba(0,0,0,0.1); }
+.wk-btn:hover { background: var(--paper); border-color: var(--sc); color: var(--sc); }
+.wk-btn:active { background: var(--sc); color: white; border-color: var(--sc); transform: scale(0.92); }
+.wk-btn.clear:hover { border-color: var(--neg); color: var(--neg); }
+.wk-btn.clear:active { background: var(--neg); color: white; border-color: var(--neg); }
+.cal-cell { background: var(--paper); border-right: 1px solid var(--rule-soft); border-bottom: 2px solid rgba(44, 62, 80, 0.22); padding: 0; cursor: pointer; height: 140px; transition: background 0.1s ease; position: relative; overflow: hidden; }
+.cal-cell:hover { background: #f1f7f5; }
+.cal-cell.weekend { background: #eef3f1; }
+.cal-cell.weekend:hover { background: #eef5f2; }
+.cal-cell.has-error { box-shadow: inset 0 0 0 2px var(--neg); }
+.cal-cell .zone-night { position: absolute; left: 0; right: 0; background: rgba(44, 62, 80, 0.06); pointer-events: none; }
+.cal-cell .zone-night-am { top: 0; height: 22px; }
+.cal-cell .zone-night-pm { bottom: 0; height: 22px; }
+.cal-cell .zone-mid { position: absolute; left: 0; right: 0; top: 70px; height: 0; border-top: 1px dashed rgba(0, 0, 0, 0.12); pointer-events: none; }
+.cal-cell .zone-hr { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed rgba(0, 0, 0, 0.05); pointer-events: none; }
+.cal-cell .cell-day-empty { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: var(--ink-muted); opacity: 0.4; pointer-events: none; }
+.block-slice { position: absolute; left: 3px; right: 3px; padding: 1px 4px; font-size: 9px; font-weight: 600; color: white; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; gap: 4px; overflow: hidden; pointer-events: none; line-height: 1.1; z-index: 1; }
+.block-slice .pill-h { font-family: 'IBM Plex Mono', monospace; opacity: 0.85; font-size: 8px; font-weight: 400; }
+.block-slice .pill-short { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1 1 auto; }
+.block-slice.shadow { opacity: 0.45; background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255, 255, 255, 0.35) 4px, rgba(255, 255, 255, 0.35) 8px); }
+.block-slice.amam-ghost { background-color: rgba(150, 144, 128, 0.18); background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(150, 144, 128, 0.5) 5px, rgba(150, 144, 128, 0.5) 10px); color: var(--ink-soft); border: 1px dashed rgba(94, 84, 67, 0.45); padding: 2px 4px; display: flex; align-items: center; justify-content: center; }
+.block-slice.tiny { padding: 0 3px; font-size: 8px; }
+.block-slice.tiny .pill-h { display: none; }
+.block-slice.two-line { flex-direction: column; align-items: stretch; justify-content: center; padding: 2px 4px; gap: 1px; }
+.block-slice.two-line .slice-row1 { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.block-slice.two-line .slice-row2 { font-family: 'IBM Plex Mono', monospace; font-size: 8px; font-weight: 400; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.block-pill { display: inline-flex; align-items: center; padding: 2px 6px; font-size: 9px; font-weight: 600; color: white; border-radius: 4px; line-height: 1.3; gap: 4px; }
+.block-pill .pill-h { font-family: 'IBM Plex Mono', monospace; opacity: 0.85; font-size: 8px; font-weight: 400; }
+.status { background: var(--surface-glass); -webkit-backdrop-filter: blur(var(--blur-amount)); backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--surface-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 18px 22px; margin-bottom: 24px; }
+.status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.status-item { padding: 12px; background: var(--bg-tint); border-left: 3px solid var(--ink-muted); border-radius: var(--radius-sm); }
+.status-item.ok { border-color: var(--pos); }
+.status-item.warn { border-color: var(--warn); }
+.status-item.err { border-color: var(--neg); }
+.status-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 4px; }
+.status-value { font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 400; font-style: italic; color: var(--ink); line-height: 1.1; }
+.status-value small { font-size: 11px; color: var(--ink-soft); font-style: normal; font-family: 'IBM Plex Mono', monospace; }
+.status-detail { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-muted); margin-top: 3px; }
+.breakdown { background: var(--surface-glass); -webkit-backdrop-filter: blur(var(--blur-amount)); backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--surface-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 18px 22px; margin-bottom: 24px; }
+.bd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+.bd-item { display: flex; flex-direction: column; gap: 3px; padding: 8px 0; border-bottom: 1px dashed var(--rule-soft); }
+.bd-item-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: var(--ink-muted); display: flex; align-items: center; gap: 6px; }
+.bd-item-label .swatch { width: 10px; height: 10px; flex-shrink: 0; }
+.bd-item-value { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--ink); }
+.bd-subtitle { font-family: 'Inter', sans-serif; font-size: 16px; font-style: italic; color: var(--ink); margin: 20px 0 10px; font-weight: 400; letter-spacing: -0.01em; display: flex; align-items: baseline; gap: 10px; }
+.bd-subtitle:first-of-type { margin-top: 0; }
+.bd-subtitle small { font-style: normal; font-size: 10px; color: var(--ink-muted); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 400; }
+.zone-table-wrap { overflow-x: auto; margin: 6px -8px 0; padding: 0 8px 4px; }
+.zone-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.zone-table.wide { min-width: 480px; }
+.zone-table th, .zone-table td { padding: 8px 8px; border-bottom: 1px solid var(--rule-soft); text-align: right; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
+.zone-table th { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); font-weight: 500; background: var(--bg-tint); border-bottom-color: var(--rule); }
+.zone-table td:first-child, .zone-table th:first-child { text-align: left; font-family: 'Inter', sans-serif; color: var(--ink-soft); white-space: normal; line-height: 1.3; }
+.zone-table tr.total td { background: var(--bg-tint); font-weight: 600; color: var(--ink); border-bottom: 2px solid var(--ink); border-top: 1px solid var(--rule); }
+.zone-table tr.total td:first-child { font-family: 'Inter', sans-serif; font-style: italic; font-size: 14px; }
+.comparison { background: var(--surface-glass); -webkit-backdrop-filter: blur(var(--blur-amount)); backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--surface-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 22px; margin-bottom: 24px; overflow-x: auto; }
+.comp-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.comp-table th { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); font-weight: 500; text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+.comp-table th:first-child { text-align: left; }
+.comp-table th.opt { font-family: 'Inter', sans-serif; font-style: italic; font-size: 17px; color: var(--sc); font-weight: 400; text-transform: none; letter-spacing: -0.01em; }
+.comp-table td { padding: 7px 12px; border-bottom: 1px dashed var(--rule-soft); text-align: right; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
+.comp-table td:first-child { text-align: left; font-family: 'Inter', sans-serif; color: var(--ink-soft); }
+.comp-table tr.section td { padding-top: 14px; font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); border-bottom: 1px solid var(--rule); background: var(--bg-tint); }
+.comp-table tr.total td { background: var(--bg-tint); font-weight: 600; color: var(--ink); border-bottom: 2px solid var(--ink); }
+.comp-table tr.total td:first-child { font-weight: 500; font-family: 'Inter', sans-serif; font-style: italic; font-size: 15px; }
+.comp-table .pos { color: var(--pos); font-weight: 600; }
+.comp-table .neg { color: var(--neg); font-weight: 600; }
+.comp-table .best { background: rgba(59, 135, 123, 0.10); }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(44, 62, 80, 0.45); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 100; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.modal { background: var(--surface-glass); -webkit-backdrop-filter: blur(var(--blur-amount)); backdrop-filter: blur(var(--blur-amount)); border: 1px solid var(--surface-border); border-radius: var(--radius-lg); max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-head { padding: 20px 24px 16px; border-bottom: 1px solid var(--rule); position: relative; }
+.modal-head .eyebrow { margin-bottom: 4px; font-size: 10px; }
+.modal-title { font-family: 'Inter', sans-serif; font-size: 26px; font-weight: 400; letter-spacing: -0.01em; color: var(--ink); }
+.modal-title em { font-style: normal; font-weight: 600; color: var(--color-primary); }
+.modal-close { position: absolute; top: 18px; right: 18px; background: transparent; border: none; font-family: 'Inter', sans-serif; font-size: 24px; color: var(--ink-muted); cursor: pointer; line-height: 1; padding: 4px 8px; }
+.modal-close:hover { color: var(--ink); }
+.modal-body { padding: 18px 24px; }
+.modal-foot { padding: 14px 24px 20px; border-top: 1px solid var(--rule); display: flex; justify-content: flex-end; gap: 10px; }
+.block-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.block-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; padding: 8px 10px; background: var(--bg-tint); border-left: 3px solid var(--ink-muted); align-items: center; font-size: 12px; cursor: pointer; transition: background 0.1s ease; border-radius: var(--radius-sm); }
+.block-row:hover { background: #e8f0ee; }
+.block-row.editing { cursor: default; }
+.block-info strong { display: block; font-weight: 600; color: var(--ink); }
+.block-info small { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ink-muted); margin-top: 1px; }
+.block-h { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--ink); }
+.block-del { background: transparent; border: 1px solid var(--rule); padding: 4px 8px; font-family: inherit; font-size: 11px; color: var(--neg); cursor: pointer; border-radius: 0; }
+.block-del:hover { background: var(--paper); border-color: var(--neg); }
+.add-block { padding: 14px; background: var(--bg-tint); border: 1px dashed var(--rule); }
+.add-block-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 10px; }
+.add-fields { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+@media (max-width: 480px) { .add-fields { grid-template-columns: 1fr; } }
+.add-fields > * { background: var(--bg); border: 1px solid var(--rule); padding: 7px 10px; font-size: 13px; font-family: inherit; color: var(--ink); border-radius: var(--radius-sm); min-height: 35px; }
+.btn { background: var(--color-primary); color: #fff; border: none; padding: 9px 18px; font-family: inherit; font-size: 13px; cursor: pointer; font-weight: 600; border-radius: var(--radius-sm); transform: translateY(0); transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(59, 135, 123, 0.25); }
+.btn:hover { background: var(--color-primary-dark); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59, 135, 123, 0.30); opacity: 1; }
+.btn.secondary { background: transparent; color: var(--ink); border: 1px solid var(--rule); box-shadow: none; }
+.btn.secondary:hover { background: var(--bg-tint); transform: none; box-shadow: none; opacity: 1; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+.toolbar .btn { padding: 6px 12px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.05em; text-transform: uppercase; }
+.toolbar-spacer { flex: 1; }
+.bg-consulta { background: var(--consulta); }
+.bg-ecografia { background: var(--ecografia); }
+.bg-bloco { background: var(--bloco); }
+.bg-reuniao { background: var(--reuniao); }
+.bg-trabna { background: var(--trabna); }
+.bg-su { background: var(--urgencia); }
+.bg-su-extra { background: var(--su-extra); }
+.bg-dc { background: var(--dc); }
+.bg-folga { background: var(--folga); }
+.bg-lazer { background: var(--lazer); }
+.bg-consulta-priv { background: var(--privado); }
+.bg-ecografia-priv { background: var(--privado-eco); }
+.color-consulta { color: var(--consulta); }
+.color-ecografia { color: var(--ecografia); }
+.color-bloco { color: var(--bloco); }
+.color-reuniao { color: var(--reuniao); }
+.color-trabna { color: var(--trabna); }
+.color-su { color: var(--urgencia); }
+.color-su-extra { color: var(--su-extra); }
+.color-dc { color: var(--dc); }
+.color-folga { color: var(--folga); }
+.color-lazer { color: var(--lazer); }
+.color-consulta-priv { color: var(--privado); }
+.color-ecografia-priv { color: var(--privado-eco); }
+footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--rule); font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="https://ubnic.com" aria-label="UBNIC" rel="noopener" target="_blank">
+      <svg class="brand-logo" viewBox="0 0 320 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M28 30 V50 C28 75 40 82 50 82 C60 82 72 75 72 50 V30" stroke="#3b877b" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="28" cy="30" r="7" fill="#3b877b" stroke="#ffffff" stroke-width="2.5"/>
+        <circle cx="50" cy="82" r="7" fill="#3b877b" stroke="#ffffff" stroke-width="2.5"/>
+        <circle cx="72" cy="30" r="7" fill="#3b877b" stroke="#ffffff" stroke-width="2.5"/>
+        <text x="95" y="68" font-family="'Inter', system-ui, sans-serif" font-weight="700" font-size="42" letter-spacing="-1" fill="#2c3e50">UBNIC</text>
+      </svg>
+    </a>
+    <div class="eyebrow">Simulador integrado · 8 semanas · 2026</div>
+    <h1>Simulador <em>completo</em></h1>
+    <p class="lede">Calendário editável em três cenários, cálculo exato de prémios DL 62/79, IRS progressivo com quociente conjugal.</p>
+  </header>
+  <div id="config-mount"></div>
+  <div id="private-types-mount"></div>
+  <div id="leisure-types-mount"></div>
+  <div id="scoped-section">
+    <div id="tabs-mount"></div>
+    <div id="toolbar-mount"></div>
+    <div id="calendar-mount"></div>
+    <div id="status-mount"></div>
+    <div id="breakdown-mount"></div>
+  </div>
+  <div id="comparison-mount"></div>
+  <div id="legend-mount"></div>
+  <div id="io-mount"></div>
+  <footer>
+    <span>Simulador horário · 2026</span>
+    <span>Tabelas TRU/IRS 2026 · DL 62/79</span>
+  </footer>
+</div>
+<div id="modal-mount"></div>
+
+<script>
+'use strict';
+
+// =========== CONSTANTS ===========
+const CATEGORIES = {
+  'Assistente Graduado Sénior': [
+    { pos: 3, vMes: 6019.92, vHora: 34.73 },
+    { pos: 2, vMes: 5442.93, vHora: 31.40 },
+    { pos: 1, vMes: 4865.94, vHora: 28.07 }
+  ],
+  'Assistente Graduado': [
+    { pos: 6, vMes: 4577.45, vHora: 26.41 },
+    { pos: 5, vMes: 4462.07, vHora: 25.74 },
+    { pos: 4, vMes: 4346.65, vHora: 25.08 },
+    { pos: 3, vMes: 4231.26, vHora: 24.41 },
+    { pos: 2, vMes: 4115.88, vHora: 23.75 },
+    { pos: 1, vMes: 4000.45, vHora: 23.08 }
+  ],
+  'Assistente': [
+    { pos: 6, vMes: 3942.76, vHora: 22.75 },
+    { pos: 5, vMes: 3885.06, vHora: 22.41 },
+    { pos: 4, vMes: 3827.36, vHora: 22.08 },
+    { pos: 3, vMes: 3769.65, vHora: 21.75 },
+    { pos: 2, vMes: 3654.25, vHora: 21.08 },
+    { pos: 1, vMes: 3538.87, vHora: 20.42 }
+  ]
+};
+
+const IRS_ESCALOES = [
+  { limite: 8342, taxa: 0.125 },
+  { limite: 12587, taxa: 0.157 },
+  { limite: 17838, taxa: 0.212 },
+  { limite: 23089, taxa: 0.241 },
+  { limite: 29397, taxa: 0.311 },
+  { limite: 43090, taxa: 0.349 },
+  { limite: 46566, taxa: 0.431 },
+  { limite: 86634, taxa: 0.446 },
+  { limite: Infinity, taxa: 0.48 }
+];
+
+const BLOCK_TYPES = {
+  'consulta':       { label: 'Consulta',              short: 'Cons',  color: 'consulta',      defaultDur: 4.5,  defaultStart: '08:30', isPublic: true,  isTE: false, isSU: false, isPrivate: false, counts: true },
+  'ecografia':      { label: 'Ecografia',             short: 'Eco',   color: 'ecografia',     defaultDur: 2.5,  defaultStart: '14:00', isPublic: true,  isTE: false, isSU: false, isPrivate: false, counts: true },
+  'bloco':          { label: 'Bloco',                 short: 'Bloco', color: 'bloco',         defaultDur: 6,    defaultStart: '14:00', isPublic: true,  isTE: false, isSU: false, isPrivate: false, counts: true },
+  'reuniao':        { label: 'Reunião',               short: 'Reun',  color: 'reuniao',       defaultDur: 3,    defaultStart: '08:00', isPublic: true,  isTE: false, isSU: false, isPrivate: false, counts: true },
+  'trabna':         { label: 'Trabalho não assist.',  short: 'NA',    color: 'trabna',        defaultDur: 6,    defaultStart: '08:00', isPublic: true,  isTE: false, isSU: false, isPrivate: false, counts: true },
+  'su':             { label: 'SU',                    short: 'SU',    color: 'su',            defaultDur: 24,   defaultStart: '08:00', isPublic: true,  isTE: false, isSU: true,  isPrivate: false, counts: true },
+  'su-extra':       { label: 'SU extra',              short: 'SU+',   color: 'su-extra',      defaultDur: 8,    defaultStart: '20:00', isPublic: true,  isTE: true,  isSU: true,  isPrivate: false, counts: true },
+  'dc':             { label: 'Descanso compensatório',short: 'DC',    color: 'dc',            defaultDur: 8,    defaultStart: '08:00', isPublic: false, isTE: false, isSU: false, isPrivate: false, counts: false },
+  'folga':          { label: 'Folga 8h',              short: 'F8',    color: 'folga',         defaultDur: 8,    defaultStart: '08:00', isPublic: false, isTE: false, isSU: false, isPrivate: false, counts: false },
+  'consulta-priv':  { label: 'Consulta privado',      short: 'PCons', color: 'consulta-priv', defaultDur: 5,    defaultStart: '09:00', isPublic: false, isTE: false, isSU: false, isPrivate: true,  counts: false },
+  'ecografia-priv': { label: 'Ecografia privado',     short: 'PEco',  color: 'ecografia-priv',defaultDur: 5,    defaultStart: '09:00', isPublic: false, isTE: false, isSU: false, isPrivate: true,  counts: false }
+};
+
+const SCENARIOS = {
+  A: { name: 'Dedicação Plena', meta: ['40h', 'DP 25%'], hasDP: true,  baseReductionPct: 0,    suMinBase: 128 },
+  B: { name: 'Sem DP',          meta: ['40h', 'sem DP'], hasDP: false, baseReductionPct: 0,    suMinBase: 128 },
+  C: { name: 'Tempo parcial',   meta: ['36h', '−10% base'], hasDP: false, baseReductionPct: 0.10, suMinBase: 115.2 }
+};
+
+const DAY_LABELS = ['2ª', '3ª', '4ª', '5ª', '6ª', 'Sáb', 'Dom'];
+const HOL_ANNUAL_DISCOUNT = 0.10;
+
+// =========== STATE ===========
+const state = {
+  config: {
+    categoria: 'Assistente',
+    posicao: 2,
+    amamentacao: false,
+    conjugeBruto: 50000,
+    privateRates: { 'consulta-priv': 80, 'ecografia-priv': 80 },
+    customTypes: {}, // { id: { label, short, color, rate, defaultDur, defaultStart } }
+    leisureTypes: {} // { id: { label, short, defaultDur, defaultStart } } — blocos não remunerados
+  },
+  calendars: { A: null, B: null, C: null },
+  lastUsed: {}, // { [type]: { startTime, duration } } — última configuração usada por tipo
+  currentScenario: 'A',
+  editing: null,
+  loaded: false
+};
+
+// =========== HELPERS ===========
+function fmt(n) { return new Intl.NumberFormat('pt-PT', {minimumFractionDigits: 0, maximumFractionDigits: 0}).format(Math.round(n)) + '€'; }
+function fmtH(h) {
+  if (h === 0) return '0h';
+  const r = Math.round(h * 100) / 100;
+  return r % 1 === 0 ? r + 'h' : r.toFixed(2).replace('.', ',') + 'h';
+}
+function toMin(t) { const p = t.split(':').map(Number); return p[0]*60+p[1]; }
+function fromMin(m) { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m/60); const mi = Math.floor(m%60); return String(h).padStart(2,'0') + ':' + String(mi).padStart(2,'0'); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+function classifyHour(dayIdx, hourOfDay) {
+  let day = dayIdx, hour = hourOfDay;
+  while (hour >= 24) { hour -= 24; day = (day + 1) % 7; }
+  while (hour < 0) { hour += 24; day = (day - 1 + 7) % 7; }
+  if (hour >= 20) {
+    if (day === 5 || day === 6) return 'Z4';
+    return 'Z2';
+  } else if (hour < 8) {
+    const prev = (day - 1 + 7) % 7;
+    if (prev === 5 || prev === 6) return 'Z4';
+    return 'Z2';
+  } else {
+    if (day === 6) return 'Z3';
+    if (day === 5) { if (hour < 13) return 'Z1'; return 'Z3'; }
+    return 'Z1';
+  }
+}
+
+function splitBlockByZone(block, dayIdx) {
+  const result = { Z1: 0, Z2: 0, Z3: 0, Z4: 0 };
+  const startHour = toMin(block.startTime) / 60;
+  const totalHours = block.duration;
+  const step = 0.25;
+  let cur = 0;
+  while (cur < totalHours) {
+    const remaining = totalHours - cur;
+    const thisStep = Math.min(step, remaining);
+    const midHour = startHour + cur + thisStep / 2;
+    const zone = classifyHour(dayIdx, midHour);
+    result[zone] += thisStep;
+    cur += thisStep;
+  }
+  for (const k of Object.keys(result)) result[k] = Math.round(result[k] * 4) / 4;
+  return result;
+}
+
+function sundayHours(block, dayIdx) {
+  const startHour = toMin(block.startTime) / 60;
+  const totalHours = block.duration;
+  const step = 0.25;
+  let sunH = 0;
+  let cur = 0;
+  while (cur < totalHours) {
+    const remaining = totalHours - cur;
+    const thisStep = Math.min(step, remaining);
+    const midHour = startHour + cur + thisStep / 2;
+    let day = dayIdx, hour = midHour;
+    while (hour >= 24) { hour -= 24; day = (day + 1) % 7; }
+    if (day === 6) sunH += thisStep;
+    cur += thisStep;
+  }
+  return Math.round(sunH * 4) / 4;
+}
+
+function calcIRSProgressivo(rc) {
+  if (rc <= 0) return 0;
+  let imposto = 0, lastLimit = 0;
+  for (const esc of IRS_ESCALOES) {
+    if (rc <= esc.limite) { imposto += (rc - lastLimit) * esc.taxa; return imposto; }
+    imposto += (esc.limite - lastLimit) * esc.taxa;
+    lastLimit = esc.limite;
+  }
+  return imposto;
+}
+
+function emptyCalendar() {
+  const cal = [];
+  for (let w = 0; w < 8; w++) {
+    const week = [];
+    for (let d = 0; d < 7; d++) week.push([]);
+    cal.push(week);
+  }
+  return cal;
+}
+
+function defaultCalendarA() {
+  const cal = emptyCalendar();
+  for (let w = 0; w < 4; w++) {
+    cal[w][0] = [{ type: 'su', startTime: '08:00', duration: 12 }];
+    cal[w][1] = [{ type: 'reuniao', startTime: '08:15', duration: 10.5 }];
+    cal[w][2] = w === 2 ? [{ type: 'bloco', startTime: '14:00', duration: 6 }] : [{ type: 'ecografia', startTime: '14:00', duration: 4.5 }];
+    cal[w][4] = [{ type: 'consulta', startTime: '08:30', duration: 7.5 }];
+  }
+  cal[4][0] = [{ type: 'consulta', startTime: '08:30', duration: 9.75 }];
+  cal[4][1] = [{ type: 'reuniao', startTime: '08:15', duration: 10.5 }];
+  cal[4][2] = [{ type: 'bloco', startTime: '14:00', duration: 6 }];
+  cal[4][4] = [{ type: 'su', startTime: '08:00', duration: 12 }];
+  cal[5][0] = [{ type: 'consulta', startTime: '08:30', duration: 13.25 }];
+  cal[5][1] = [{ type: 'reuniao', startTime: '08:15', duration: 10.5 }];
+  cal[5][2] = [{ type: 'ecografia', startTime: '14:00', duration: 4.5 }];
+  cal[5][4] = [{ type: 'consulta', startTime: '08:30', duration: 7.5 }];
+  cal[5][5] = [{ type: 'su', startTime: '08:00', duration: 12 }];
+  cal[6][0] = [{ type: 'consulta', startTime: '08:30', duration: 9.75 }];
+  cal[6][1] = [{ type: 'reuniao', startTime: '08:15', duration: 10.5 }];
+  cal[6][2] = [{ type: 'ecografia', startTime: '14:00', duration: 4.5 }];
+  cal[6][4] = [{ type: 'consulta', startTime: '08:30', duration: 7.5 }];
+  cal[6][6] = [{ type: 'su', startTime: '08:00', duration: 12 }];
+  cal[7][0] = [{ type: 'consulta', startTime: '08:30', duration: 9.75 }];
+  cal[7][1] = [{ type: 'reuniao', startTime: '08:15', duration: 10.5 }];
+  cal[7][2] = [{ type: 'ecografia', startTime: '14:00', duration: 4.5 }];
+  cal[7][4] = [{ type: 'consulta', startTime: '08:30', duration: 7.5 }];
+  return cal;
+}
+
+function defaultCalendarC() {
+  const cal = emptyCalendar();
+  const suDays = [0, 0, 0, 0, 4, 5, 6, null];
+  for (let w = 0; w < 8; w++) {
+    cal[w][1].push({ type: 'reuniao', startTime: '08:00', duration: 3 });
+    cal[w][2].push({ type: 'ecografia', startTime: '14:00', duration: 2.5 });
+    cal[w][3].push({ type: 'consulta', startTime: '08:30', duration: 4.5 });
+    if (suDays[w] !== null) {
+      cal[w][suDays[w]].push({ type: 'su', startTime: '08:00', duration: 24 });
+    }
+  }
+  return cal;
+}
+
+// =========== STORAGE ===========
+async function loadFromStorage(key, defaultValue) {
+  try {
+    if (typeof window.storage === 'undefined' || !window.storage) return defaultValue;
+    const result = await window.storage.get(key);
+    if (result && result.value) return JSON.parse(result.value);
+  } catch (e) { /* missing or unavailable */ }
+  return defaultValue;
+}
+
+async function saveToStorage(key, value) {
+  try {
+    if (typeof window.storage === 'undefined' || !window.storage) return;
+    await window.storage.set(key, JSON.stringify(value));
+  } catch (e) { /* ignore */ }
+}
+
+function persistConfig() { saveToStorage('config', state.config); }
+function persistCalendar(sc) { saveToStorage('cal:' + sc, state.calendars[sc]); }
+function persistLastUsed() { saveToStorage('lastUsed', state.lastUsed); }
+
+// Regista um tipo customizado dinamicamente em BLOCK_TYPES (mutação intencional do objecto const)
+function registerCustomType(id, ct) {
+  BLOCK_TYPES[id] = {
+    label: ct.label,
+    short: ct.short || ct.label.substring(0, 4),
+    color: ct.color || 'consulta-priv',
+    defaultDur: ct.defaultDur || 1,
+    defaultStart: ct.defaultStart || '09:00',
+    isPublic: false, isTE: false, isSU: false, isPrivate: true,
+    counts: false, isCustom: true
+  };
+}
+
+// Regista um tipo de lazer (não remunerado)
+function registerLeisureType(id, lt) {
+  BLOCK_TYPES[id] = {
+    label: lt.label,
+    short: lt.short || lt.label.substring(0, 4),
+    color: 'lazer',
+    defaultDur: lt.defaultDur || 1,
+    defaultStart: lt.defaultStart || '07:00',
+    isPublic: false, isTE: false, isSU: false, isPrivate: false,
+    counts: false, isLeisure: true
+  };
+}
+
+// Devolve a tarifa €/h para um tipo privado (built-in ou custom)
+function getPrivateRate(type) {
+  const r = state.config.privateRates && state.config.privateRates[type];
+  return (typeof r === 'number' && r >= 0) ? r : 80;
+}
+
+// Devolve { startTime, duration } para um tipo de bloco, dando prioridade a state.lastUsed
+function getDefaultsForType(type) {
+  const meta = BLOCK_TYPES[type];
+  if (!meta) return { startTime: '08:00', duration: 1 };
+  const last = state.lastUsed[type];
+  if (last && last.startTime && last.duration > 0) {
+    return { startTime: last.startTime, duration: last.duration };
+  }
+  return { startTime: meta.defaultStart, duration: meta.defaultDur };
+}
+
+// Custom confirm dialog (window.confirm is blocked in sandboxed iframes).
+// Built with createElement + inline styles + max z-index for max robustness.
+function showConfirm(message, onConfirm) {
+  // Remove any existing confirm overlay first
+  const existing = document.getElementById('confirm-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'confirm-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2147483647;padding:16px;font-family:Inter,system-ui,sans-serif;';
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#ffffff;border:2px solid #2c3e50;max-width:420px;width:100%;padding:22px 24px;box-shadow:0 20px 60px rgba(0,0,0,0.4);';
+
+  const msg = document.createElement('p');
+  msg.textContent = message;
+  msg.style.cssText = 'font-family:Inter,sans-serif;font-size:16px;line-height:1.5;margin:0 0 20px;color:#2c3e50;white-space:pre-line;';
+  box.appendChild(msg);
+
+  const btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Cancelar';
+  cancelBtn.style.cssText = 'background:transparent;color:#2c3e50;border:1px solid #dfe6e3;padding:10px 18px;font-family:inherit;font-size:14px;cursor:pointer;border-radius:0;';
+  cancelBtn.addEventListener('click', () => { overlay.remove(); });
+
+  const okBtn = document.createElement('button');
+  okBtn.type = 'button';
+  okBtn.textContent = 'Confirmar';
+  okBtn.style.cssText = 'background:#2c3e50;color:#ffffff;border:none;padding:10px 18px;font-family:inherit;font-size:14px;cursor:pointer;border-radius:0;font-weight:500;';
+  okBtn.addEventListener('click', () => {
+    overlay.remove();
+    try { onConfirm(); } catch (e) { console.error(e); }
+  });
+
+  btns.appendChild(cancelBtn);
+  btns.appendChild(okBtn);
+  box.appendChild(btns);
+  overlay.appendChild(box);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  document.body.appendChild(overlay);
+}
+
+// =========== CALCULATION ===========
+function getBaseInfo() {
+  const cat = CATEGORIES[state.config.categoria];
+  return cat.find(c => c.pos === state.config.posicao) || cat[0];
+}
+
+function calcScenario(scKey) {
+  const sc = SCENARIOS[scKey];
+  const cal = state.calendars[scKey];
+  const baseInfo = getBaseInfo();
+  const baseMensal = baseInfo.vMes * (1 - sc.baseReductionPct);
+  const dpMensal = sc.hasDP ? baseMensal * 0.25 : 0;
+  // R (tarifa horária para prémios/TE) é independente do contrato — o vHora da tabela TRU
+  // é o mesmo para 40h e 36h; apenas a base mensal escala (porque há menos horas/mês).
+  const R = baseInfo.vHora * (sc.hasDP ? 1.25 : 1);
+
+  let totalRealH = 0, totalSU = 0, totalSUExtra = 0;
+  let totalPrivHByType = {};
+  let privadoRemun8Sem = 0;
+  let folgaCredits = 0, folgaUsed = 0, dcCount = 0;
+  const folgaSunHByWeek = {}; // horas de su-extra que caem no domingo, somadas por semana (1 domingo/semana)
+  let suplementos = 0, teRemun = 0;
+  let activeDays = 0;
+  const zoneBreakdown = { Z1: 0, Z2: 0, Z3: 0, Z4: 0 };
+  const teZoneBreakdown = { Z1: 0, Z2: 0, Z3: 0, Z4: 0 };
+  const tnRemunByZone = { Z1: 0, Z2: 0, Z3: 0, Z4: 0 };
+  const teRemunByZone = { Z1: 0, Z2: 0, Z3: 0, Z4: 0 };
+  const byType = {};
+  const errors = [];
+
+  cal.forEach((week, wi) => {
+    // Detecção de sobreposição ao longo da semana inteira (incl. blocos que atravessam meia-noite)
+    const weekIntervals = [];
+    week.forEach((day, di) => {
+      day.forEach(b => {
+        const m = BLOCK_TYPES[b.type];
+        if (!m || !b.duration || b.type === 'dc' || b.type === 'folga') return;
+        const startAbs = di * 1440 + toMin(b.startTime);
+        weekIntervals.push({
+          start: startAbs,
+          end: startAbs + b.duration * 60,
+          day: di,
+          short: m.short
+        });
+      });
+    });
+    weekIntervals.sort((a, b) => a.start - b.start);
+    for (let i = 1; i < weekIntervals.length; i++) {
+      if (weekIntervals[i].start < weekIntervals[i-1].end) {
+        const prev = weekIntervals[i-1], cur = weekIntervals[i];
+        const daySpec = prev.day === cur.day ? DAY_LABELS[prev.day] : DAY_LABELS[prev.day] + '→' + DAY_LABELS[cur.day];
+        errors.push('S' + (wi+1) + ' ' + daySpec + ': sobreposição ' + prev.short + ' × ' + cur.short);
+      }
+    }
+
+    week.forEach((day, di) => {
+      const dayBlocks = day.filter(b => BLOCK_TYPES[b.type]);
+      const dayHrs = dayBlocks.filter(b => BLOCK_TYPES[b.type].counts).reduce((s, b) => s + b.duration, 0);
+      if (dayHrs > 24) errors.push('S' + (wi+1) + ' ' + DAY_LABELS[di] + ': ' + dayHrs + 'h > 24h');
+      if (day.some(b => {
+        const m = BLOCK_TYPES[b.type];
+        if (!m || !m.counts || m.isTE || !b.duration) return false;
+        const startH = toMin(b.startTime) / 60;
+        return (startH + b.duration) <= 24;
+      })) activeDays += 1;
+
+      day.forEach(block => {
+        const meta = BLOCK_TYPES[block.type];
+        if (!meta) return;
+        byType[block.type] = (byType[block.type] || 0) + (block.duration || 0);
+        if (meta.isLeisure) return; // lazer: aparece no calendário e no byType, mas não afecta cálculos
+        if (meta.isPrivate) {
+          totalPrivHByType[block.type] = (totalPrivHByType[block.type] || 0) + block.duration;
+          privadoRemun8Sem += block.duration * getPrivateRate(block.type);
+          return;
+        }
+        if (block.type === 'folga') { folgaUsed += 1; return; }
+        if (block.type === 'dc') { dcCount += 1; return; }
+        if (meta.isSU) {
+          // Folga: só horas de SU extra (su-extra) que caem no domingo contam.
+          // Somam-se entre blocos do mesmo domingo (chave = semana, di=6); 1 folga se o total >=4h.
+          if (block.type === 'su-extra') {
+            const sunH = sundayHours(block, di);
+            if (sunH > 0) folgaSunHByWeek[wi] = (folgaSunHByWeek[wi] || 0) + sunH;
+          }
+          if (block.type === 'su') totalSU += block.duration;
+          else totalSUExtra += block.duration;
+        }
+        // SU+ (isTE) é trabalho extra; não conta para o mínimo contratual de horas
+        if (meta.counts && !meta.isTE) totalRealH += block.duration;
+        const zones = splitBlockByZone(block, di);
+        for (const z of Object.keys(zones)) zoneBreakdown[z] += zones[z];
+
+        if (meta.isTE) {
+          const rates = {
+            Z1: { first: 1.25, rest: 1.5 },
+            Z2: { first: 1.75, rest: 2 },
+            Z3: { first: 1.75, rest: 2 },
+            Z4: { first: 2.25, rest: 2.5 }
+          };
+          const blockStartHour = toMin(block.startTime) / 60;
+          const step = 0.25;
+          let cur = 0;
+          while (cur < block.duration) {
+            const thisStep = Math.min(step, block.duration - cur);
+            const midHour = blockStartHour + cur + thisStep / 2;
+            const z = classifyHour(di, midHour);
+            const isFirstHour = cur < 1;
+            const rate = isFirstHour ? rates[z].first : rates[z].rest;
+            const eur = thisStep * rate * R;
+            teRemun += eur;
+            teRemunByZone[z] += eur;
+            teZoneBreakdown[z] += thisStep;
+            cur += thisStep;
+          }
+        } else {
+          const mults = { Z1: 1, Z2: 1.5, Z3: 1.5, Z4: 2 };
+          for (const z of Object.keys(zones)) {
+            const h = zones[z];
+            if (h === 0) continue;
+            const eur = h * (mults[z] - 1) * R;
+            suplementos += eur;
+            tnRemunByZone[z] += eur;
+          }
+        }
+      });
+    });
+  });
+
+  folgaCredits = Object.values(folgaSunHByWeek).filter(h => h >= 4).length; // 1 folga por domingo com >=4h de su-extra (somadas entre blocos)
+  const suMinSatisfied = totalSU >= sc.suMinBase;
+  const folgasAvailable = folgaCredits - folgaUsed;
+  if (folgaUsed > folgaCredits) errors.push('Folgas usadas (' + folgaUsed + ') > créditos (' + folgaCredits + ')');
+
+  // Total contratual (8 semanas) — não muda com amamentação
+  // Amamentação ACRESCENTA 2h fictícias por cada dia em que pelo menos um bloco termina no mesmo dia
+  const contractualWeekly = 40 * (1 - sc.baseReductionPct);
+  const totalContratual = contractualWeekly * 8;
+  const amamBonus = state.config.amamentacao ? 2 * activeDays : 0;
+  const totalRealHEffective = totalRealH + amamBonus;
+  const totalRequired = totalContratual;
+  const totalHorasOk = totalRealHEffective >= totalRequired;
+
+  const annualBaseFixed = baseMensal * 14 + dpMensal * 14;
+  const annualSuplementos = suplementos * 6.5 * (1 - HOL_ANNUAL_DISCOUNT);
+  const annualTE = teRemun * 6.5 * (1 - HOL_ANNUAL_DISCOUNT);
+  const annualPrivado = privadoRemun8Sem * 6.5 * (1 - HOL_ANNUAL_DISCOUNT);
+  const brutoPubAnual = annualBaseFixed + annualSuplementos + annualTE;
+  const brutoMensalMedia = brutoPubAnual / 12;
+  const ssAnual = brutoPubAnual * 0.11;
+  const dedEspecifica = Math.max(4104, ssAnual);
+  const rcMariana = Math.max(0, brutoPubAnual - dedEspecifica);
+  const ssConjuge = (state.config.conjugeBruto || 0) * 0.11;
+  const dedConjuge = Math.max(4104, ssConjuge);
+  const rcConjuge = Math.max(0, (state.config.conjugeBruto || 0) - dedConjuge);
+  const rcFamilia = rcMariana + rcConjuge;
+  // Colecta familiar (progressiva, quociente conjugal) e deduções à colecta
+  // Assume-se 1 200€ fixos como aproximação (despesas gerais + dependentes + PPR + saúde),
+  // valor típico de um casal com um filho e despesas declaradas regulares.
+  const IRS_DEDUCOES_COLECTA = 1200;
+  const coletaFamilia = calcIRSProgressivo(rcFamilia / 2) * 2;
+  const irsFamilia = Math.max(0, coletaFamilia - IRS_DEDUCOES_COLECTA);
+  const irsMariana = rcFamilia > 0 ? irsFamilia * (rcMariana / rcFamilia) : 0;
+  const taxaMediaMariana = brutoPubAnual > 0 ? irsMariana / brutoPubAnual : 0;
+  const liquidoAnual = brutoPubAnual - ssAnual - irsMariana;
+  const liquidoMensal = liquidoAnual / 12;
+
+  // === 8-week earnings (literal for variables; base extrapolated from annual × 8/52) ===
+  const base8Sem = baseMensal * 14 * 8 / 52;
+  const dp8Sem = dpMensal * 14 * 8 / 52;
+  const baseDp8Sem = base8Sem + dp8Sem;
+  const suplementos8Sem = suplementos; // literal
+  const te8Sem = teRemun; // literal
+  const pub8SemTotal = baseDp8Sem + suplementos8Sem + te8Sem;
+  const privCons8Sem = (totalPrivHByType['consulta-priv'] || 0) * getPrivateRate('consulta-priv');
+  const privEco8Sem = (totalPrivHByType['ecografia-priv'] || 0) * getPrivateRate('ecografia-priv');
+  // Total dos custom types (todos os privados que não sejam os dois built-in)
+  let privCustom8Sem = 0;
+  Object.keys(totalPrivHByType).forEach(t => {
+    if (t === 'consulta-priv' || t === 'ecografia-priv') return;
+    privCustom8Sem += totalPrivHByType[t] * getPrivateRate(t);
+  });
+  const priv8SemTotal = privadoRemun8Sem;
+  const total8Sem = pub8SemTotal + priv8SemTotal;
+  // Backwards-compat: hours per built-in private type for any legacy consumer
+  const totalPrivE = totalPrivHByType['ecografia-priv'] || 0;
+  const totalPrivC = totalPrivHByType['consulta-priv'] || 0;
+
+  return {
+    sc, cal, baseMensal, dpMensal, R,
+    totalRealH, totalSU, totalSUExtra, totalPrivE, totalPrivC,
+    folgaCredits, folgaUsed, folgasAvailable, dcCount,
+    suplementos, teRemun, zoneBreakdown, teZoneBreakdown, byType,
+    tnRemunByZone, teRemunByZone,
+    brutoPubAnual, brutoMensalMedia,
+    annualBaseFixed, annualSuplementos, annualTE, annualPrivado,
+    ssAnual, rcMariana, irsMariana, taxaMediaMariana,
+    liquidoAnual, liquidoMensal,
+    privadoBrutoAnual: annualPrivado, privadoBrutoMensal: annualPrivado / 12,
+    base8Sem, dp8Sem, baseDp8Sem, suplementos8Sem, te8Sem, pub8SemTotal,
+    privEco8Sem, privCons8Sem, privCustom8Sem, priv8SemTotal, total8Sem, totalPrivHByType,
+    activeDays, totalContratual, amamBonus, totalRealHEffective, totalRequired, totalHorasOk,
+    errors, suMinSatisfied
+  };
+}
+
+function calcAll() {
+  return { A: calcScenario('A'), B: calcScenario('B'), C: calcScenario('C') };
+}
+
+// =========== RENDER ===========
+function renderLeisureTypes() {
+  const ids = Object.keys(state.config.leisureTypes || {});
+  const html = `
+    <section class="config">
+      <h2 class="section-title">Lazer <small style="font-size:12px; color:var(--ink-muted); font-style:italic; font-family:Inter,sans-serif">· blocos não remunerados</small></h2>
+      <div class="priv-types-grid">
+        ${ids.map(id => {
+          const lt = state.config.leisureTypes[id];
+          return `
+            <div class="priv-type-row">
+              <input type="text" class="priv-type-label-input" data-leisure-label="${id}" value="${esc(lt.label)}" placeholder="Nome">
+              <div class="priv-type-rate">
+                <input type="number" min="0.25" step="0.25" max="24" data-leisure-dur="${id}" value="${lt.defaultDur}" style="width:64px">
+                <span>h</span>
+                <button class="priv-type-del" data-del-leisure="${id}" title="Eliminar tipo">×</button>
+              </div>
+            </div>
+          `;
+        }).join('') || '<div style="color:var(--ink-muted); font-style:italic; font-family:Inter,sans-serif; font-size:13px">— sem tipos definidos</div>'}
+      </div>
+      <button id="add-leisure-type" class="btn secondary" style="margin-top:12px">+ Adicionar tipo de lazer</button>
+    </section>
+  `;
+  document.getElementById('leisure-types-mount').innerHTML = html;
+
+  document.querySelectorAll('[data-leisure-label]').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const id = e.target.getAttribute('data-leisure-label');
+      const newLabel = (e.target.value || '').trim() || 'Lazer';
+      state.config.leisureTypes[id].label = newLabel;
+      state.config.leisureTypes[id].short = newLabel.substring(0, 5);
+      registerLeisureType(id, state.config.leisureTypes[id]);
+      persistConfig();
+      renderAll();
+    });
+  });
+
+  document.querySelectorAll('[data-leisure-dur]').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const id = e.target.getAttribute('data-leisure-dur');
+      const v = parseFloat(e.target.value);
+      const dur = (isFinite(v) && v > 0) ? Math.round(v * 4) / 4 : 1;
+      state.config.leisureTypes[id].defaultDur = dur;
+      registerLeisureType(id, state.config.leisureTypes[id]);
+      persistConfig();
+      renderAllDependents();
+    });
+  });
+
+  document.querySelectorAll('[data-del-leisure]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const id = e.target.getAttribute('data-del-leisure');
+      const lt = state.config.leisureTypes[id];
+      let usage = 0;
+      ['A','B','C'].forEach(sc => {
+        state.calendars[sc].forEach(week => week.forEach(day => day.forEach(b => { if (b.type === id) usage++; })));
+      });
+      const msg = usage > 0
+        ? 'Eliminar "' + lt.label + '"? Há ' + usage + ' bloco(s) no calendário que serão também removidos.'
+        : 'Eliminar tipo "' + lt.label + '"?';
+      showConfirm(msg, () => {
+        ['A','B','C'].forEach(sc => {
+          state.calendars[sc].forEach(week => week.forEach((day, di) => {
+            week[di] = day.filter(b => b.type !== id);
+          }));
+          persistCalendar(sc);
+        });
+        delete state.config.leisureTypes[id];
+        delete BLOCK_TYPES[id];
+        if (state.lastUsed[id]) delete state.lastUsed[id];
+        persistConfig();
+        persistLastUsed();
+        renderAll();
+      });
+    });
+  });
+
+  document.getElementById('add-leisure-type').addEventListener('click', () => {
+    const existing = Object.keys(state.config.leisureTypes || {});
+    let n = existing.length + 1;
+    let id = 'lazer-' + n;
+    while (BLOCK_TYPES[id]) { n++; id = 'lazer-' + n; }
+    const lt = {
+      label: 'Lazer ' + n,
+      short: 'L' + n,
+      defaultDur: 1,
+      defaultStart: '07:00'
+    };
+    state.config.leisureTypes[id] = lt;
+    registerLeisureType(id, lt);
+    persistConfig();
+    renderAll();
+  });
+}
+
+function renderPrivateTypes() {
+  const builtIns = [
+    ['consulta-priv', 'Consulta privado'],
+    ['ecografia-priv', 'Ecografia privado']
+  ];
+  const customIds = Object.keys(state.config.customTypes || {});
+  const html = `
+    <section class="config">
+      <h2 class="section-title">Tarifas privadas <small style="font-size:12px; color:var(--ink-muted); font-style:italic; font-family:Inter,sans-serif">· €/hora por tipo</small></h2>
+      <div class="priv-types-grid">
+        ${builtIns.map(([id, label]) => `
+          <div class="priv-type-row">
+            <div class="priv-type-label">${esc(label)}</div>
+            <div class="priv-type-rate">
+              <input type="number" min="0" step="1" data-priv-rate="${id}" value="${getPrivateRate(id)}" style="width:72px">
+              <span>€/h</span>
+            </div>
+          </div>
+        `).join('')}
+        ${customIds.map(id => {
+          const ct = state.config.customTypes[id];
+          return `
+            <div class="priv-type-row">
+              <input type="text" class="priv-type-label-input" data-custom-label="${id}" value="${esc(ct.label)}" placeholder="Nome do tipo">
+              <div class="priv-type-rate">
+                <input type="number" min="0" step="1" data-priv-rate="${id}" value="${getPrivateRate(id)}" style="width:72px">
+                <span>€/h</span>
+                <button class="priv-type-del" data-del-custom="${id}" title="Eliminar tipo">×</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <button id="add-custom-type" class="btn secondary" style="margin-top:12px">+ Adicionar tipo privado</button>
+    </section>
+  `;
+  document.getElementById('private-types-mount').innerHTML = html;
+
+  // Rate inputs (built-in or custom)
+  document.querySelectorAll('[data-priv-rate]').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const id = e.target.getAttribute('data-priv-rate');
+      const v = parseFloat(e.target.value);
+      state.config.privateRates[id] = (isFinite(v) && v >= 0) ? v : 0;
+      persistConfig();
+      renderAllDependents();
+    });
+  });
+
+  // Custom label inputs
+  document.querySelectorAll('[data-custom-label]').forEach(inp => {
+    inp.addEventListener('change', e => {
+      const id = e.target.getAttribute('data-custom-label');
+      const newLabel = (e.target.value || '').trim() || 'Tipo';
+      state.config.customTypes[id].label = newLabel;
+      state.config.customTypes[id].short = newLabel.substring(0, 5);
+      registerCustomType(id, state.config.customTypes[id]);
+      persistConfig();
+      renderAll();
+    });
+  });
+
+  // Delete custom type
+  document.querySelectorAll('[data-del-custom]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const id = e.target.getAttribute('data-del-custom');
+      const ct = state.config.customTypes[id];
+      // Count usage across all scenarios
+      let usage = 0;
+      ['A','B','C'].forEach(sc => {
+        state.calendars[sc].forEach(week => week.forEach(day => day.forEach(b => { if (b.type === id) usage++; })));
+      });
+      const msg = usage > 0
+        ? 'Eliminar "' + ct.label + '"? Há ' + usage + ' bloco(s) no calendário que serão também removidos.'
+        : 'Eliminar tipo "' + ct.label + '"?';
+      showConfirm(msg, () => {
+        // Remove blocks of this type from all scenarios
+        ['A','B','C'].forEach(sc => {
+          state.calendars[sc].forEach(week => week.forEach((day, di) => {
+            week[di] = day.filter(b => b.type !== id);
+          }));
+          persistCalendar(sc);
+        });
+        delete state.config.customTypes[id];
+        delete state.config.privateRates[id];
+        delete BLOCK_TYPES[id];
+        if (state.lastUsed[id]) delete state.lastUsed[id];
+        persistConfig();
+        persistLastUsed();
+        renderAll();
+      });
+    });
+  });
+
+  // Add new custom type
+  document.getElementById('add-custom-type').addEventListener('click', () => {
+    const existing = Object.keys(state.config.customTypes || {});
+    let n = existing.length + 1;
+    let id = 'custom-' + n;
+    while (BLOCK_TYPES[id]) { n++; id = 'custom-' + n; }
+    const ct = {
+      label: 'Tipo ' + n,
+      short: 'T' + n,
+      color: 'consulta-priv',
+      rate: 80,
+      defaultDur: 1,
+      defaultStart: '09:00'
+    };
+    state.config.customTypes[id] = ct;
+    state.config.privateRates[id] = 80;
+    registerCustomType(id, ct);
+    persistConfig();
+    renderAll();
+  });
+}
+
+function renderConfig() {
+  const baseInfo = getBaseInfo();
+  const positions = CATEGORIES[state.config.categoria];
+  document.getElementById('config-mount').innerHTML = `
+    <section class="config">
+      <h2 class="section-title">Configuração base</h2>
+      <div class="config-row">
+        <div class="field">
+          <label>Categoria</label>
+          <select id="inp-categoria">
+            ${Object.keys(CATEGORIES).map(c => `<option ${c===state.config.categoria?'selected':''}>${esc(c)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Posição</label>
+          <select id="inp-posicao">
+            ${positions.map(p => `<option value="${p.pos}" ${p.pos===state.config.posicao?'selected':''}>${p.pos}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Cônjuge · bruto anual (€)</label>
+          <input type="number" id="inp-conjuge" value="${state.config.conjugeBruto}">
+          <span class="help-text">Para IRS com quociente conjugal</span>
+        </div>
+        <div class="field">
+          <label>Amamentação</label>
+          <label class="toggle">
+            <input type="checkbox" id="inp-amamentacao" ${state.config.amamentacao?'checked':''}>
+            <span>Conta +2h fictícias/dia</span>
+          </label>
+        </div>
+      </div>
+      <div class="config-summary">
+        <span>Base mensal (40h): <strong>${fmt(baseInfo.vMes)}</strong></span>
+        <span>v/hora (R): <strong>${baseInfo.vHora.toFixed(2).replace('.',',')}€</strong></span>
+        <span>Com DP (×1,25): <strong>${(baseInfo.vHora * 1.25).toFixed(2).replace('.',',')}€/h</strong></span>
+      </div>
+    </section>
+  `;
+  document.getElementById('inp-categoria').addEventListener('change', e => {
+    state.config.categoria = e.target.value;
+    const positions = CATEGORIES[e.target.value];
+    if (!positions.find(p => p.pos === state.config.posicao)) {
+      state.config.posicao = positions[positions.length - 1].pos;
+    }
+    persistConfig();
+    renderConfig();
+    renderAllDependents();
+  });
+  document.getElementById('inp-posicao').addEventListener('change', e => {
+    state.config.posicao = parseInt(e.target.value);
+    persistConfig();
+    renderConfig();
+    renderAllDependents();
+  });
+  document.getElementById('inp-conjuge').addEventListener('change', e => {
+    state.config.conjugeBruto = parseFloat(e.target.value) || 0;
+    persistConfig();
+    renderAllDependents();
+  });
+  document.getElementById('inp-amamentacao').addEventListener('change', e => {
+    state.config.amamentacao = e.target.checked;
+    persistConfig();
+    renderAll();
+  });
+}
+
+function renderTabs(calcs) {
+  function tabStatus(calc) {
+    if (calc.errors.length > 0) return 'err';
+    if (!calc.suMinSatisfied || !calc.totalHorasOk) return 'warn';
+    return 'ok';
+  }
+  const html = `
+    <div class="tabs">
+      ${Object.keys(SCENARIOS).map(key => {
+        const sc = SCENARIOS[key];
+        const calc = calcs[key];
+        const status = tabStatus(calc);
+        const active = state.currentScenario === key;
+        return `
+          <button class="tab scope-${key} ${active?'active':''} status-${status}" data-tab="${key}">
+            <span class="tab-letter">${key}</span>
+            <div class="tab-name">${esc(sc.name)}</div>
+            <div class="tab-meta">${sc.meta.join(' · ')}</div>
+            <div class="tab-status">
+              <span class="item ${calc.totalHorasOk?'ok':'warn'}">Tot: <strong>${fmtH(calc.totalRealHEffective)}</strong>/${fmtH(calc.totalRequired)}</span>
+              <span class="item ${calc.suMinSatisfied?'ok':'warn'}">SU: <strong>${fmtH(calc.totalSU)}</strong>/${fmtH(sc.suMinBase)}</span>
+              <span class="item ${calc.errors.length===0?'ok':'err'}">Err: <strong>${calc.errors.length}</strong></span>
+            </div>
+          </button>
+        `;
+      }).join('')}
+    </div>
+  `;
+  document.getElementById('tabs-mount').innerHTML = html;
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.currentScenario = btn.getAttribute('data-tab');
+      renderAll();
+    });
+  });
+}
+
+function renderToolbar() {
+  const cs = state.currentScenario;
+  const mount = document.getElementById('toolbar-mount');
+  mount.innerHTML = `
+    <div class="toolbar">
+      <button class="btn secondary toolbar-sc" id="btn-fill">Preencher padrão</button>
+      ${cs !== 'A' ? '<button class="btn secondary" data-copy="A">Copiar de A</button>' : ''}
+      ${cs !== 'B' ? '<button class="btn secondary" data-copy="B">Copiar de B</button>' : ''}
+      ${cs !== 'C' ? '<button class="btn secondary" data-copy="C">Copiar de C</button>' : ''}
+      <div class="toolbar-spacer"></div>
+      <button class="btn secondary" id="btn-clear" style="color:var(--neg)">Limpar</button>
+    </div>
+  `;
+  document.getElementById('btn-fill').addEventListener('click', () => {
+    showConfirm('Substituir o calendário ' + cs + ' pelo padrão?', () => {
+      state.calendars[cs] = cs === 'C' ? defaultCalendarC() : defaultCalendarA();
+      persistCalendar(cs);
+      renderAll();
+    });
+  });
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    showConfirm('Limpar todo o calendário do cenário ' + cs + '?', () => {
+      state.calendars[cs] = emptyCalendar();
+      persistCalendar(cs);
+      renderAll();
+    });
+  });
+  document.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const src = btn.getAttribute('data-copy');
+      showConfirm('Copiar calendário de ' + src + ' para ' + cs + '?', () => {
+        state.calendars[cs] = JSON.parse(JSON.stringify(state.calendars[src]));
+        persistCalendar(cs);
+        renderAll();
+      });
+    });
+  });
+}
+
+// Map hour-of-day to pixel position within a 140px cell.
+// Compressed nights (0-8h, 20-24h), expanded daytime (8-14h, 14-20h).
+function hourToPixel(hour) {
+  if (hour <= 0) return 0;
+  if (hour >= 24) return 140;
+  if (hour <= 8) return (hour / 8) * 22;
+  if (hour <= 14) return 22 + ((hour - 8) / 6) * 48;
+  if (hour <= 20) return 70 + ((hour - 14) / 6) * 48;
+  return 118 + ((hour - 20) / 4) * 22;
+}
+
+function getSlicesForDay(blocks) {
+  const slices = [];
+  blocks.forEach((b, idx) => {
+    const meta = BLOCK_TYPES[b.type];
+    if (!meta) return;
+    if (!b.duration || b.duration <= 0) return;
+    const startHour = toMin(b.startTime) / 60;
+    const endHour = Math.min(24, startHour + b.duration);
+    if (endHour <= startHour) return;
+    slices.push({ block: b, blockIdx: idx, startHour, endHour, meta });
+  });
+  return slices;
+}
+
+function getShadowsForDay(cal, week, day) {
+  const shadows = [];
+  let prevWeek = week, prevDay = day - 1;
+  if (prevDay < 0) { prevDay = 6; prevWeek -= 1; }
+  if (prevWeek < 0) return shadows;
+  const prevBlocks = cal[prevWeek][prevDay];
+  prevBlocks.forEach(b => {
+    const meta = BLOCK_TYPES[b.type];
+    if (!meta) return;
+    if (!b.duration || b.duration <= 0) return;
+    const startHour = toMin(b.startTime) / 60;
+    const endHour = startHour + b.duration;
+    if (endHour > 24) {
+      shadows.push({ block: b, startHour: 0, endHour: Math.min(24, endHour - 24), meta });
+    }
+  });
+  return shadows;
+}
+
+function renderCalendar() {
+  const cs = state.currentScenario;
+  const cal = state.calendars[cs];
+  const mount = document.getElementById('calendar-mount');
+  const weekHasData = (week) => week.some(d => d.length > 0);
+  const html = `
+    <div class="calendar">
+      <div class="cal-grid">
+        <div class="cal-header"></div>
+        ${DAY_LABELS.map((d, i) => `<div class="cal-header ${i>=5?'weekend':''}">${d}</div>`).join('')}
+        ${cal.map((week, wi) => {
+          const canCopyPrev = wi > 0;
+          let row = `
+            <div class="cal-wknum">
+              <span class="wknum-label">${wi+1}</span>
+              <div class="wk-btns">
+                ${canCopyPrev ? `<button type="button" class="wk-btn" data-wk-copy="${wi}" title="Copiar semana ${wi}">↓</button>` : ''}
+                <button type="button" class="wk-btn clear" data-wk-clear="${wi}" title="Limpar semana ${wi+1}">×</button>
+              </div>
+            </div>
+          `;
+          row += week.map((day, di) => {
+            const dayHrs = day.filter(b => BLOCK_TYPES[b.type] && BLOCK_TYPES[b.type].counts).reduce((s, b) => s + b.duration, 0);
+            const hasErr = dayHrs > 24;
+            const slices = getSlicesForDay(day);
+            const shadows = getShadowsForDay(cal, wi, di);
+            const isEmpty = slices.length === 0 && shadows.length === 0 && day.length === 0;
+            const slicesHtml = slices.map(s => {
+              const top = hourToPixel(s.startHour);
+              const bot = hourToPixel(s.endHour);
+              const h = Math.max(2, bot - top);
+              const isTiny = h < 16;
+              const isTwoLine = h >= 26;
+              let labelHtml;
+              if (isTiny) {
+                labelHtml = `<span class="pill-short">${esc(s.meta.label)}</span>`;
+              } else if (isTwoLine) {
+                const endTime = fromMin(toMin(s.block.startTime) + s.block.duration * 60);
+                labelHtml = `<div style="display:flex;align-items:center;justify-content:space-between;gap:4px;width:100%;line-height:1.1"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">${esc(s.meta.label)}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;opacity:0.9;flex-shrink:0">${s.block.duration}h</span></div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:400;opacity:0.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;line-height:1.1">${s.block.startTime}→${endTime}</div>`;
+              } else {
+                labelHtml = `<span class="pill-short">${esc(s.meta.label)}</span><span class="pill-h">${s.block.duration}h</span>`;
+              }
+              const isTinyCls = isTiny ? 'tiny' : '';
+              const twoLineStyle = isTwoLine ? 'flex-direction:column;align-items:stretch;justify-content:center;padding:2px 5px;' : '';
+              return `<div class="block-slice bg-${s.meta.color} ${isTinyCls}" style="top:${top}px;height:${h}px;${twoLineStyle}">${labelHtml}</div>`;
+            }).join('');
+            const shadowsHtml = shadows.map(s => {
+              const top = hourToPixel(s.startHour);
+              const bot = hourToPixel(s.endHour);
+              const h = Math.max(2, bot - top);
+              return `<div class="block-slice shadow bg-${s.meta.color}" style="top:${top}px; height:${h}px"></div>`;
+            }).join('');
+            // Bloco fantasma de amamentação: +2h no fim do último bloco do dia (se algum termina no próprio dia)
+            let amamHtml = '';
+            if (state.config.amamentacao) {
+              let latestEnd = -1;
+              day.forEach(b => {
+                const m = BLOCK_TYPES[b.type];
+                if (!m || !m.counts || m.isTE || !b.duration) return;
+                const startH = toMin(b.startTime) / 60;
+                const endH = startH + b.duration;
+                if (endH <= 24 && endH > latestEnd) latestEnd = endH;
+              });
+              if (latestEnd >= 0) {
+                const gStart = latestEnd;
+                const gEnd = Math.min(24, latestEnd + 2);
+                const top = hourToPixel(gStart);
+                const bot = hourToPixel(gEnd);
+                const h = Math.max(2, bot - top);
+                const showText = h >= 16;
+                amamHtml = `<div class="block-slice amam-ghost" style="top:${top}px;height:${h}px">${showText ? '<span style="font-family:\'IBM Plex Mono\',monospace;font-size:9px;font-style:italic;font-weight:400">+2h amam</span>' : ''}</div>`;
+              }
+            }
+            return `<div class="cal-cell ${di>=5?'weekend':''} ${hasErr?'has-error':''}" data-week="${wi}" data-day="${di}">
+              <div class="zone-night zone-night-am"></div>
+              <div class="zone-night zone-night-pm"></div>
+              <div class="zone-hr" style="top:38px"></div>
+              <div class="zone-hr" style="top:54px"></div>
+              <div class="zone-mid"></div>
+              <div class="zone-hr" style="top:86px"></div>
+              <div class="zone-hr" style="top:102px"></div>
+              ${shadowsHtml}
+              ${amamHtml}
+              ${slicesHtml}
+              ${isEmpty ? '<div class="cell-day-empty">+</div>' : ''}
+            </div>`;
+          }).join('');
+          return row;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  mount.innerHTML = html;
+
+  // Event delegation: single listener on the mount for all clicks
+  mount.onclick = (e) => {
+    const copyBtn = e.target.closest('[data-wk-copy]');
+    if (copyBtn) {
+      e.stopPropagation();
+      const wi = parseInt(copyBtn.getAttribute('data-wk-copy'));
+      const doCopy = () => {
+        state.calendars[cs][wi] = JSON.parse(JSON.stringify(state.calendars[cs][wi-1]));
+        persistCalendar(cs);
+        renderAll();
+      };
+      const target = state.calendars[cs][wi];
+      if (weekHasData(target)) {
+        showConfirm(`A semana ${wi+1} já tem dados que serão substituídos pelo conteúdo da semana ${wi}. Continuar?`, doCopy);
+      } else {
+        doCopy();
+      }
+      return;
+    }
+    const clearBtn = e.target.closest('[data-wk-clear]');
+    if (clearBtn) {
+      e.stopPropagation();
+      const wi = parseInt(clearBtn.getAttribute('data-wk-clear'));
+      const doClear = () => {
+        state.calendars[cs][wi] = [[],[],[],[],[],[],[]];
+        persistCalendar(cs);
+        renderAll();
+      };
+      const target = state.calendars[cs][wi];
+      if (weekHasData(target)) {
+        showConfirm(`Limpar todos os blocos da semana ${wi+1}? Esta ação não pode ser desfeita.`, doClear);
+      } else {
+        doClear();
+      }
+      return;
+    }
+    const cell = e.target.closest('.cal-cell');
+    if (cell) {
+      state.editing = {
+        week: parseInt(cell.getAttribute('data-week')),
+        day: parseInt(cell.getAttribute('data-day')),
+        blockIdx: null
+      };
+      renderModal();
+    }
+  };
+}
+
+function renderStatus(calc) {
+  const totalHorasDiff = calc.totalRequired - calc.totalRealHEffective;
+  const mount = document.getElementById('status-mount');
+  const html = `
+    <section class="status">
+      <h2 class="section-title">Estado · cenário ${esc(calc.sc.name)}</h2>
+      <div class="status-grid">
+        <div class="status-item ${calc.totalHorasOk?'ok':'warn'}">
+          <div class="status-label">Total horas (8 sem)</div>
+          <div class="status-value">${fmtH(calc.totalRealHEffective)}<small> / ${fmtH(calc.totalRequired)}</small></div>
+          <div class="status-detail">${calc.totalHorasOk ? '✓ horário cumprido' : '⚠ faltam ' + fmtH(totalHorasDiff)}${calc.amamBonus>0 ? ' · +'+calc.amamBonus+'h amam.' : ''}</div>
+        </div>
+        <div class="status-item ${calc.suMinSatisfied?'ok':'warn'}">
+          <div class="status-label">Mínimo SU base</div>
+          <div class="status-value">${fmtH(calc.totalSU)}<small> / ${fmtH(calc.sc.suMinBase)}</small></div>
+          <div class="status-detail">${calc.suMinSatisfied ? '✓ acima do mínimo' : '⚠ faltam ' + fmtH(calc.sc.suMinBase - calc.totalSU)}${calc.totalSUExtra>0?' · SU+ ' + fmtH(calc.totalSUExtra):''}</div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">Privado (8 sem)</div>
+          <div class="status-value">${fmtH(calc.totalPrivE + calc.totalPrivC)}</div>
+          <div class="status-detail">${fmtH(calc.totalPrivE)} eco · ${fmtH(calc.totalPrivC)} consulta</div>
+        </div>
+        <div class="status-item ${calc.folgasAvailable>=0?'ok':'err'}">
+          <div class="status-label">Folgas 8h</div>
+          <div class="status-value">${calc.folgasAvailable}<small> disp.</small></div>
+          <div class="status-detail">${calc.folgaCredits} ganhas · ${calc.folgaUsed} usadas</div>
+        </div>
+        ${calc.errors.length > 0 ? `
+          <div class="status-item err" style="grid-column: 1 / -1">
+            <div class="status-label">Erros</div>
+            <div style="font-size:12px; color:var(--neg); margin-top:4px">
+              ${calc.errors.map(e => '<div>· ' + esc(e) + '</div>').join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    </section>
+  `;
+  mount.innerHTML = html;
+}
+
+function renderBreakdown(calc) {
+  const publicItems = [
+    ['consulta', 'Consulta'],
+    ['ecografia', 'Ecografia'],
+    ['bloco', 'Bloco'],
+    ['reuniao', 'Reunião'],
+    ['trabna', 'Trab. não assist.'],
+    ['su', 'SU base'],
+    ['su-extra', 'SU extra']
+  ];
+  // Privados: built-in primeiro, depois custom types (ordem alfabética)
+  const privateBuiltIn = [
+    ['consulta-priv', 'Consulta privado'],
+    ['ecografia-priv', 'Ecografia privado']
+  ];
+  const privateCustom = Object.keys(state.config.customTypes || {})
+    .filter(id => BLOCK_TYPES[id])
+    .sort((a, b) => BLOCK_TYPES[a].label.localeCompare(BLOCK_TYPES[b].label, 'pt'))
+    .map(id => [id, BLOCK_TYPES[id].label]);
+  const privateItems = privateBuiltIn.concat(privateCustom);
+  // Lazer: ordem alfabética
+  const leisureItems = Object.keys(state.config.leisureTypes || {})
+    .filter(id => BLOCK_TYPES[id])
+    .sort((a, b) => BLOCK_TYPES[a].label.localeCompare(BLOCK_TYPES[b].label, 'pt'))
+    .map(id => [id, BLOCK_TYPES[id].label]);
+  const otherItems = [
+    ['dc', 'Descanso comp.'],
+    ['folga', 'Folgas 8h']
+  ];
+
+  function buildGrid(items) {
+    const filtered = items.filter(([key]) => (calc.byType[key] || 0) > 0);
+    if (filtered.length === 0) return '<div style="color:var(--ink-muted); font-style:italic; font-family:Inter,sans-serif; font-size:13px">— sem horas registadas</div>';
+    return '<div class="bd-grid">' + filtered.map(([key, label]) => {
+      const meta = BLOCK_TYPES[key];
+      const h = calc.byType[key] || 0;
+      return `
+        <div class="bd-item">
+          <span class="bd-item-label"><span class="swatch bg-${meta.color}"></span>${esc(label)}</span>
+          <span class="bd-item-value">${fmtH(h)}</span>
+        </div>
+      `;
+    }).join('') + '</div>';
+  }
+
+  const tnZ1 = Math.max(0, calc.zoneBreakdown.Z1 - calc.teZoneBreakdown.Z1);
+  const tnZ2 = Math.max(0, calc.zoneBreakdown.Z2 - calc.teZoneBreakdown.Z2);
+  const tnZ3 = Math.max(0, calc.zoneBreakdown.Z3 - calc.teZoneBreakdown.Z3);
+  const tnZ4 = Math.max(0, calc.zoneBreakdown.Z4 - calc.teZoneBreakdown.Z4);
+  const tnTotal = tnZ1 + tnZ2 + tnZ3 + tnZ4;
+  const teTotal = calc.teZoneBreakdown.Z1 + calc.teZoneBreakdown.Z2 + calc.teZoneBreakdown.Z3 + calc.teZoneBreakdown.Z4;
+
+  const hasAusencias = (calc.byType.dc || 0) > 0 || (calc.byType.folga || 0) > 0;
+
+  const html = `
+    <section class="breakdown">
+      <h2 class="section-title">Decomposição · 8 semanas</h2>
+      <h3 class="bd-subtitle">Hospital público <small>· horas registadas</small></h3>
+      ${buildGrid(publicItems)}
+      <h3 class="bd-subtitle">Privado <small>· faturado pela empresa</small></h3>
+      ${buildGrid(privateItems)}
+      ${leisureItems.some(([k]) => (calc.byType[k] || 0) > 0) ? `<h3 class="bd-subtitle">Lazer <small>· tempo pessoal</small></h3>${buildGrid(leisureItems)}` : ''}
+      ${hasAusencias ? `<h3 class="bd-subtitle">Ausências</h3>${buildGrid(otherItems)}` : ''}
+      <h3 class="bd-subtitle">Horas por zona horária · hospital público</h3>
+      <div class="zone-table-wrap"><table class="zone-table wide">
+        <thead>
+          <tr>
+            <th>Zona</th>
+            <th>Trabalho normal</th>
+            <th>Trabalho extra</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Diurno em dias úteis</td><td>${fmtH(tnZ1)}</td><td>${fmtH(calc.teZoneBreakdown.Z1)}</td><td>${fmtH(tnZ1 + calc.teZoneBreakdown.Z1)}</td></tr>
+          <tr><td>Noturno em dias úteis</td><td>${fmtH(tnZ2)}</td><td>${fmtH(calc.teZoneBreakdown.Z2)}</td><td>${fmtH(tnZ2 + calc.teZoneBreakdown.Z2)}</td></tr>
+          <tr><td>Diurno sábados &gt;13h, dom, fer</td><td>${fmtH(tnZ3)}</td><td>${fmtH(calc.teZoneBreakdown.Z3)}</td><td>${fmtH(tnZ3 + calc.teZoneBreakdown.Z3)}</td></tr>
+          <tr><td>Noturno sábados &gt;20h, dom, fer</td><td>${fmtH(tnZ4)}</td><td>${fmtH(calc.teZoneBreakdown.Z4)}</td><td>${fmtH(tnZ4 + calc.teZoneBreakdown.Z4)}</td></tr>
+          <tr class="total"><td>Total</td><td>${fmtH(tnTotal)}</td><td>${fmtH(teTotal)}</td><td>${fmtH(tnTotal + teTotal)}</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3 class="bd-subtitle">Remuneração por zona horária · hospital público <small>· 8 semanas</small></h3>
+      <div class="zone-table-wrap"><table class="zone-table wide">
+        <thead>
+          <tr>
+            <th>Zona</th>
+            <th>Trabalho normal</th>
+            <th>Trabalho extra</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Diurno em dias úteis</td><td>${fmt(calc.tnRemunByZone.Z1)}</td><td>${fmt(calc.teRemunByZone.Z1)}</td><td>${fmt(calc.tnRemunByZone.Z1 + calc.teRemunByZone.Z1)}</td></tr>
+          <tr><td>Noturno em dias úteis</td><td>${fmt(calc.tnRemunByZone.Z2)}</td><td>${fmt(calc.teRemunByZone.Z2)}</td><td>${fmt(calc.tnRemunByZone.Z2 + calc.teRemunByZone.Z2)}</td></tr>
+          <tr><td>Diurno sábados &gt;13h, dom, fer</td><td>${fmt(calc.tnRemunByZone.Z3)}</td><td>${fmt(calc.teRemunByZone.Z3)}</td><td>${fmt(calc.tnRemunByZone.Z3 + calc.teRemunByZone.Z3)}</td></tr>
+          <tr><td>Noturno sábados &gt;20h, dom, fer</td><td>${fmt(calc.tnRemunByZone.Z4)}</td><td>${fmt(calc.teRemunByZone.Z4)}</td><td>${fmt(calc.tnRemunByZone.Z4 + calc.teRemunByZone.Z4)}</td></tr>
+          <tr class="total"><td>Total</td><td>${fmt(calc.suplementos8Sem)}</td><td>${fmt(calc.te8Sem)}</td><td>${fmt(calc.suplementos8Sem + calc.te8Sem)}</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3 class="bd-subtitle">Ganhos · 8 semanas <small>· bruto</small></h3>
+      <div class="zone-table-wrap"><table class="zone-table">
+        <tbody>
+          <tr><td>Base × 14 × 8/52</td><td>${fmt(calc.base8Sem)}</td></tr>
+          ${calc.dp8Sem > 0 ? `<tr><td>Dedicação Plena × 14 × 8/52</td><td>${fmt(calc.dp8Sem)}</td></tr>` : ''}
+          <tr><td>Suplementos · trabalho normal</td><td>${fmt(calc.suplementos8Sem)}</td></tr>
+          <tr><td>Trabalho extra (TE)</td><td>${fmt(calc.te8Sem)}</td></tr>
+          <tr class="total"><td>Total público</td><td>${fmt(calc.pub8SemTotal)}</td></tr>
+          ${privateItems.map(([key, label]) => {
+            const hrs = calc.totalPrivHByType[key] || 0;
+            if (hrs <= 0) return '';
+            const rate = getPrivateRate(key);
+            return `<tr><td>${esc(label)} <small style="color:var(--ink-muted)">· ${fmtH(hrs)} × ${fmt(rate).replace('€','')}€/h</small></td><td>${fmt(hrs * rate)}</td></tr>`;
+          }).filter(Boolean).join('')}
+          <tr class="total"><td>Total privado</td><td>${fmt(calc.priv8SemTotal)}</td></tr>
+          <tr class="total" style="border-top:2px solid var(--ink)"><td>Total · público + privado</td><td>${fmt(calc.total8Sem)}</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+  `;
+  const mount = document.getElementById('breakdown-mount');
+  mount.innerHTML = html;
+}
+
+function renderComparison(calcs) {
+  const a = calcs.A, b = calcs.B, c = calcs.C;
+  function bestIdx(vals, isMax = true) {
+    if (isMax) return vals.indexOf(Math.max.apply(null, vals));
+    return vals.indexOf(Math.min.apply(null, vals));
+  }
+  const totalBrutos = [a.brutoMensalMedia + a.privadoBrutoMensal, b.brutoMensalMedia + b.privadoBrutoMensal, c.brutoMensalMedia + c.privadoBrutoMensal];
+  const totalLiqs = [a.liquidoMensal + a.privadoBrutoMensal, b.liquidoMensal + b.privadoBrutoMensal, c.liquidoMensal + c.privadoBrutoMensal];
+  const ibBruto = bestIdx(totalBrutos);
+  const ibLiq = bestIdx(totalLiqs);
+
+  function row(label, vals, opts) {
+    opts = opts || {};
+    let best = -1;
+    if (opts.highlightBest) best = bestIdx(vals);
+    return `
+      <tr>
+        <td>${esc(label)}</td>
+        ${vals.map((v, i) => {
+          if (opts.raw) return `<td class="${i===best?'best':''}">${esc(String(v))}</td>`;
+          if (opts.delta) {
+            const cls = v > 0 ? 'pos' : v < 0 ? 'neg' : '';
+            return `<td class="${cls}">${v>0?'+':''}${fmt(v)}</td>`;
+          }
+          return `<td class="${i===best?'best':''}">${fmt(v)}</td>`;
+        }).join('')}
+      </tr>
+    `;
+  }
+
+  const html = `
+    <section class="comparison">
+      <h2 class="section-title">Comparação A · B · C</h2>
+      <table class="comp-table">
+        <thead>
+          <tr><th></th><th class="opt scope-A">A</th><th class="opt scope-B">B</th><th class="opt scope-C">C</th></tr>
+        </thead>
+        <tbody>
+          <tr class="section"><td colspan="4">Componentes anuais (público bruto)</td></tr>
+          ${row('Base + DP × 14', [a.annualBaseFixed, b.annualBaseFixed, c.annualBaseFixed])}
+          ${row('Suplementos TN × 0,923', [a.annualSuplementos, b.annualSuplementos, c.annualSuplementos])}
+          ${row('Trabalho extra TE × 0,923', [a.annualTE, b.annualTE, c.annualTE])}
+
+          <tr class="section"><td colspan="4">Público</td></tr>
+          ${row('Bruto anual', [a.brutoPubAnual, b.brutoPubAnual, c.brutoPubAnual])}
+          ${row('Bruto mensal (média)', [a.brutoMensalMedia, b.brutoMensalMedia, c.brutoMensalMedia])}
+          ${row('SS (11%)', [-a.ssAnual, -b.ssAnual, -c.ssAnual])}
+          ${row('IRS (cônjuge incl., −1200€ ded.)', [-a.irsMariana, -b.irsMariana, -c.irsMariana])}
+          ${row('Taxa média efectiva', [
+            (a.taxaMediaMariana*100).toFixed(2).replace('.',',') + '%',
+            (b.taxaMediaMariana*100).toFixed(2).replace('.',',') + '%',
+            (c.taxaMediaMariana*100).toFixed(2).replace('.',',') + '%'
+          ], {raw: true})}
+          ${row('Líquido anual', [a.liquidoAnual, b.liquidoAnual, c.liquidoAnual])}
+          ${row('Líquido mensal (média)', [a.liquidoMensal, b.liquidoMensal, c.liquidoMensal])}
+          ${row('Δ líquido vs A', [0, b.liquidoMensal - a.liquidoMensal, c.liquidoMensal - a.liquidoMensal], {delta: true})}
+
+          <tr class="section"><td colspan="4">Privado bruto · empresa</td></tr>
+          ${row('Privado anual', [a.privadoBrutoAnual, b.privadoBrutoAnual, c.privadoBrutoAnual])}
+          ${row('Privado mensal', [a.privadoBrutoMensal, b.privadoBrutoMensal, c.privadoBrutoMensal])}
+
+          <tr class="section"><td colspan="4">Tempo</td></tr>
+          ${row('Total horas (8 sem)', [fmtH(a.totalRealHEffective), fmtH(b.totalRealHEffective), fmtH(c.totalRealHEffective)], {raw: true})}
+          ${row('SU base / SU extra', [
+            fmtH(a.totalSU) + ' / ' + fmtH(a.totalSUExtra),
+            fmtH(b.totalSU) + ' / ' + fmtH(b.totalSUExtra),
+            fmtH(c.totalSU) + ' / ' + fmtH(c.totalSUExtra)
+          ], {raw: true})}
+
+          <tr class="total">
+            <td>TOTAL bruto / mês (público + privado)</td>
+            ${totalBrutos.map((v, i) => `<td class="${i===ibBruto?'best':''}">${fmt(v)}</td>`).join('')}
+          </tr>
+          <tr class="total">
+            <td>TOTAL líquido + privado bruto / mês</td>
+            ${totalLiqs.map((v, i) => `<td class="${i===ibLiq?'best':''}">${fmt(v)}</td>`).join('')}
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin: 14px 0 0; font-size: 11px; color: var(--ink-muted); line-height: 1.5; font-style: italic">
+        IRS calculado com quociente conjugal (escalões progressivos 2026 sobre rendimento colectável/2, multiplicado por 2) e dedução fixa de 1 200€ à colecta familiar — aproximação típica para casal com 1 filho considerando despesas gerais, dependentes, PPR e saúde. Para situações fora deste padrão (mais filhos, despesas elevadas, sem PPR) o IRS líquido real pode divergir 200–800€/ano.
+      </p>
+    </section>
+  `;
+  document.getElementById('comparison-mount').innerHTML = html;
+}
+
+function renderLegend() {
+  const amamItem = state.config.amamentacao ? `
+    <div style="display:flex; align-items:center; gap:8px; color:var(--ink-soft); grid-column: 1 / -1; padding-top: 8px; margin-top: 4px; border-top: 1px dashed var(--rule)">
+      <span class="block-pill amam-ghost" style="min-width:32px; justify-content:center; color: var(--ink-soft); font-style: italic; font-weight: 400">+2h</span>
+      <span>Amamentação · 2h fictícias acrescentadas ao fim do último bloco do dia (sem aumento de horas a realizar)</span>
+    </div>
+  ` : '';
+  const html = `
+    <section class="comparison" style="padding: 18px 22px">
+      <h2 class="section-title" style="margin-bottom:12px">Legenda · tipos de bloco</h2>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px 16px; font-size:12px">
+        ${Object.keys(BLOCK_TYPES).map(k => {
+          const v = BLOCK_TYPES[k];
+          return `
+            <div style="display:flex; align-items:center; gap:8px; color:var(--ink-soft)">
+              <span class="block-pill bg-${v.color}" style="min-width:32px; justify-content:center">${v.short}</span>
+              <span>${esc(v.label)}</span>
+            </div>
+          `;
+        }).join('')}
+        ${amamItem}
+      </div>
+    </section>
+  `;
+  document.getElementById('legend-mount').innerHTML = html;
+}
+
+function renderImportExport() {
+  const html = `
+    <section class="io-section">
+      <h2 class="section-title">Exportar / importar simulação</h2>
+      <p style="font-family:Inter,sans-serif;font-size:14px;color:var(--ink-soft);line-height:1.5;margin:8px 0 16px">Guarda toda a simulação num ficheiro <code style="font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--bg-tint);padding:2px 6px">.json</code> para arquivar ou enviar a alguém. Inclui configuração, calendários dos três cenários, tipos privados e de lazer, tarifas e nota opcional.</p>
+      <div class="io-row">
+        <label class="io-label">Nota opcional <small>(visível para quem importar)</small></label>
+        <textarea id="export-note" rows="2" placeholder="Ex: Cenário base de Mariana com 16h SU/sem, antes da renegociação contratual"></textarea>
+      </div>
+      <div class="io-actions">
+        <button class="btn" id="export-btn">↓ Exportar simulação</button>
+        <button class="btn secondary" id="import-btn">↑ Carregar ficheiro</button>
+        <input type="file" id="import-file" accept="application/json,.json" style="display:none">
+      </div>
+    </section>
+  `;
+  document.getElementById('io-mount').innerHTML = html;
+
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const note = (document.getElementById('export-note').value || '').trim();
+    const payload = {
+      version: 1,
+      app: 'simulador-completo-2026',
+      exportedAt: new Date().toISOString(),
+      note: note,
+      currentScenario: state.currentScenario,
+      config: state.config,
+      calendars: state.calendars,
+      lastUsed: state.lastUsed
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    a.download = `simulacao-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.json`;
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 100);
+  });
+
+  const fileInput = document.getElementById('import-file');
+  document.getElementById('import-btn').addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      let data;
+      try { data = JSON.parse(ev.target.result); }
+      catch (err) { showConfirm('Ficheiro inválido — não é JSON válido.', () => {}); fileInput.value = ''; return; }
+
+      // Validação básica de estrutura
+      const valid =
+        data && typeof data === 'object' &&
+        data.config && typeof data.config === 'object' &&
+        data.calendars && data.calendars.A && data.calendars.B && data.calendars.C &&
+        Array.isArray(data.calendars.A) && data.calendars.A.length === 8;
+
+      if (!valid) {
+        showConfirm('Ficheiro inválido — estrutura não reconhecida.\n\nO ficheiro deve ser uma exportação do simulador (config + 3 calendários de 8 semanas).', () => {});
+        fileInput.value = '';
+        return;
+      }
+
+      // Formatar mensagem de confirmação com nota + data
+      const expDate = data.exportedAt ? new Date(data.exportedAt) : null;
+      const dateStr = expDate ? expDate.toLocaleDateString('pt-PT') + ' ' + expDate.toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit'}) : '?';
+      const noteStr = data.note ? '"' + data.note + '"' : '(sem nota)';
+      const msg = 'Substituir TODA a simulação actual pela importada?\n\nData de exportação: ' + dateStr + '\nNota: ' + noteStr + '\n\nEsta acção não pode ser desfeita.';
+
+      showConfirm(msg, () => {
+        // Apply
+        try {
+          // Limpar tipos custom e leisure registados no BLOCK_TYPES actual
+          Object.keys(state.config.customTypes || {}).forEach(id => { delete BLOCK_TYPES[id]; });
+          Object.keys(state.config.leisureTypes || {}).forEach(id => { delete BLOCK_TYPES[id]; });
+
+          // Substituir config (mantém defaults para campos em falta)
+          const defaults = { categoria: 'Assistente', posicao: 2, amamentacao: false, conjugeBruto: 50000, privateRates: {}, customTypes: {}, leisureTypes: {} };
+          state.config = Object.assign({}, defaults, data.config);
+          if (!state.config.privateRates || typeof state.config.privateRates !== 'object') state.config.privateRates = {};
+          if (typeof state.config.privateRates['consulta-priv'] !== 'number') state.config.privateRates['consulta-priv'] = 80;
+          if (typeof state.config.privateRates['ecografia-priv'] !== 'number') state.config.privateRates['ecografia-priv'] = 80;
+          if (!state.config.customTypes || typeof state.config.customTypes !== 'object') state.config.customTypes = {};
+          if (!state.config.leisureTypes || typeof state.config.leisureTypes !== 'object') state.config.leisureTypes = {};
+
+          // Substituir calendários
+          state.calendars = { A: data.calendars.A, B: data.calendars.B, C: data.calendars.C };
+
+          // Substituir lastUsed
+          state.lastUsed = (data.lastUsed && typeof data.lastUsed === 'object') ? data.lastUsed : {};
+
+          // Cenário corrente
+          if (data.currentScenario && ['A','B','C'].includes(data.currentScenario)) {
+            state.currentScenario = data.currentScenario;
+          }
+
+          // Re-registar tipos no BLOCK_TYPES
+          Object.keys(state.config.customTypes).forEach(id => registerCustomType(id, state.config.customTypes[id]));
+          Object.keys(state.config.leisureTypes).forEach(id => registerLeisureType(id, state.config.leisureTypes[id]));
+
+          // Persistir tudo
+          persistConfig();
+          persistCalendar('A');
+          persistCalendar('B');
+          persistCalendar('C');
+          persistLastUsed();
+
+          // Re-render completo
+          renderConfig();
+          renderAll();
+        } catch (err) {
+          showConfirm('Erro ao aplicar o ficheiro: ' + (err.message || err), () => {});
+        }
+        fileInput.value = '';
+      });
+    };
+    reader.onerror = () => { showConfirm('Erro ao ler o ficheiro.', () => {}); fileInput.value = ''; };
+    reader.readAsText(file);
+  });
+}
+
+function renderModal() {
+  const mount = document.getElementById('modal-mount');
+  if (!state.editing) { mount.innerHTML = ''; return; }
+  const { week, day } = state.editing;
+  const blockIdx = (state.editing.blockIdx !== undefined && state.editing.blockIdx !== null) ? state.editing.blockIdx : null;
+  const blocks = state.calendars[state.currentScenario][week][day];
+  const isEdit = blockIdx !== null && blocks[blockIdx];
+
+  let initialType, initialStart, initialDur;
+  if (isEdit) {
+    const b = blocks[blockIdx];
+    initialType = b.type;
+    initialStart = b.startTime;
+    initialDur = b.duration;
+  } else {
+    initialType = 'consulta';
+    const d = getDefaultsForType(initialType);
+    initialStart = d.startTime;
+    initialDur = d.duration;
+  }
+
+  mount.innerHTML = `
+    <div class="modal-backdrop" id="modal-bg">
+      <div class="modal" id="modal-content">
+        <div class="modal-head">
+          <div class="eyebrow">Semana ${week+1} · ${DAY_LABELS[day]}</div>
+          <div class="modal-title">Editar <em>dia</em></div>
+          <button class="modal-close" id="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          ${blocks.length > 0 ? `
+            <div style="font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-muted); margin-bottom:8px">Blocos existentes <small style="text-transform:none; letter-spacing:0; font-style:italic; font-family:Inter,sans-serif; color:var(--ink-muted)">· toque para editar</small></div>
+            <div class="block-list">
+              ${blocks.map((b, i) => {
+                const m = BLOCK_TYPES[b.type];
+                if (!m) return '';
+                const endTime = fromMin(toMin(b.startTime) + b.duration * 60);
+                const isActive = isEdit && blockIdx === i;
+                return `
+                  <div class="block-row ${isActive?'editing':''}" data-edit="${i}" style="border-left-color: var(--${m.color}); ${isActive?'background:var(--paper); box-shadow: inset 0 0 0 1px var(--ink)':''}">
+                    <div class="block-info">
+                      <strong class="color-${m.color}">${esc(m.label)}${isActive?' · <em style="font-style:italic; color:var(--ink-muted); font-weight:400">a editar</em>':''}</strong>
+                      <small>${b.startTime} → ${endTime}</small>
+                    </div>
+                    <span class="block-h">${b.duration}h</span>
+                    <button class="block-del" data-del="${i}">×</button>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : ''}
+          <div class="add-block" style="${isEdit?'border-style:solid; border-color:var(--ink)':''}">
+            <div class="add-block-title">${isEdit ? 'Editar bloco' : 'Adicionar bloco'}</div>
+            <div class="add-fields">
+              <select id="add-type">
+                ${Object.keys(BLOCK_TYPES).map(k => `<option value="${k}" ${k===initialType?'selected':''}>${esc(BLOCK_TYPES[k].label)}</option>`).join('')}
+              </select>
+              <input type="time" id="add-start" value="${initialStart}">
+              <input type="number" step="0.25" min="0.25" max="24" id="add-dur" value="${initialDur}">
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap">
+              <button class="btn" id="add-btn">${isEdit ? 'Guardar' : '+ Adicionar'}</button>
+              ${isEdit ? '<button class="btn secondary" id="cancel-edit">Cancelar edição</button>' : ''}
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn" id="modal-close2">Fechar</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('modal-bg').addEventListener('click', e => {
+    if (e.target.id === 'modal-bg') closeModal();
+  });
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-close2').addEventListener('click', closeModal);
+
+  // Click on block row to edit
+  document.querySelectorAll('[data-edit]').forEach(row => {
+    row.addEventListener('click', e => {
+      // Don't trigger edit if clicking the delete button
+      if (e.target.closest('[data-del]')) return;
+      const idx = parseInt(row.getAttribute('data-edit'));
+      state.editing.blockIdx = (state.editing.blockIdx === idx) ? null : idx;
+      renderModal();
+    });
+  });
+
+  // Delete buttons
+  document.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = parseInt(btn.getAttribute('data-del'));
+      const cs = state.currentScenario;
+      state.calendars[cs][week][day].splice(idx, 1);
+      // If we were editing this block or one after it, adjust
+      if (state.editing.blockIdx !== null && state.editing.blockIdx !== undefined) {
+        if (state.editing.blockIdx === idx) state.editing.blockIdx = null;
+        else if (state.editing.blockIdx > idx) state.editing.blockIdx -= 1;
+      }
+      persistCalendar(cs);
+      renderModal();
+      renderCalendar();
+      renderAllDependents();
+    });
+  });
+
+  // Type change: in add mode, reset start/duration to last-used (or defaults). In edit mode, keep current values.
+  document.getElementById('add-type').addEventListener('change', e => {
+    if (!isEdit) {
+      const d = getDefaultsForType(e.target.value);
+      document.getElementById('add-start').value = d.startTime;
+      document.getElementById('add-dur').value = d.duration;
+    }
+  });
+
+  // Add/Save button
+  document.getElementById('add-btn').addEventListener('click', () => {
+    const type = document.getElementById('add-type').value;
+    const startTime = document.getElementById('add-start').value;
+    const dur = parseFloat(document.getElementById('add-dur').value);
+    if (!type || !startTime || !(dur > 0)) return;
+    const duration = Math.round(dur * 4) / 4;
+    const block = { type, startTime, duration };
+    const cs = state.currentScenario;
+    if (isEdit) {
+      state.calendars[cs][week][day][blockIdx] = block;
+      state.editing.blockIdx = null;
+    } else {
+      state.calendars[cs][week][day].push(block);
+    }
+    // Memorizar configuração deste tipo para o próximo bloco
+    state.lastUsed[type] = { startTime, duration };
+    persistLastUsed();
+    persistCalendar(cs);
+    renderModal();
+    renderCalendar();
+    renderAllDependents();
+  });
+
+  // Cancel edit
+  if (isEdit) {
+    document.getElementById('cancel-edit').addEventListener('click', () => {
+      state.editing.blockIdx = null;
+      renderModal();
+    });
+  }
+}
+
+function closeModal() {
+  state.editing = null;
+  renderModal();
+}
+
+function renderAllDependents() {
+  const calcs = calcAll();
+  const scoped = document.getElementById('scoped-section');
+  if (scoped) scoped.className = `scope-${state.currentScenario}`;
+  renderTabs(calcs);
+  renderStatus(calcs[state.currentScenario]);
+  renderBreakdown(calcs[state.currentScenario]);
+  renderComparison(calcs);
+}
+
+function renderAll() {
+  const calcs = calcAll();
+  const scoped = document.getElementById('scoped-section');
+  if (scoped) scoped.className = `scope-${state.currentScenario}`;
+  renderTabs(calcs);
+  renderToolbar();
+  renderCalendar();
+  renderStatus(calcs[state.currentScenario]);
+  renderBreakdown(calcs[state.currentScenario]);
+  renderComparison(calcs);
+  renderLegend();
+  renderModal();
+  renderPrivateTypes();
+  renderLeisureTypes();
+  renderImportExport();
+}
+
+// =========== INIT ===========
+(async function init() {
+  try {
+    const c = await loadFromStorage('config', null);
+    const defaults = { categoria: 'Assistente', posicao: 2, amamentacao: false, conjugeBruto: 50000 };
+    if (c) {
+      Object.assign(state.config, defaults, c);
+      if (!state.config.conjugeBruto || state.config.conjugeBruto === 0) state.config.conjugeBruto = 50000;
+    }
+    // Backfill rates/customTypes se vierem em falta de config antigo
+    if (!state.config.privateRates || typeof state.config.privateRates !== 'object') {
+      state.config.privateRates = { 'consulta-priv': 80, 'ecografia-priv': 80 };
+    } else {
+      if (typeof state.config.privateRates['consulta-priv'] !== 'number') state.config.privateRates['consulta-priv'] = 80;
+      if (typeof state.config.privateRates['ecografia-priv'] !== 'number') state.config.privateRates['ecografia-priv'] = 80;
+    }
+    if (!state.config.customTypes || typeof state.config.customTypes !== 'object') state.config.customTypes = {};
+    if (!state.config.leisureTypes || typeof state.config.leisureTypes !== 'object') state.config.leisureTypes = {};
+    // Seed default lazer "Ginásio 1h" se não houver nenhum
+    if (Object.keys(state.config.leisureTypes).length === 0) {
+      state.config.leisureTypes['ginasio'] = { label: 'Ginásio', short: 'Gym', defaultDur: 1, defaultStart: '07:00' };
+    }
+    // Registar tipos customizados em BLOCK_TYPES
+    Object.keys(state.config.customTypes).forEach(id => registerCustomType(id, state.config.customTypes[id]));
+    Object.keys(state.config.leisureTypes).forEach(id => registerLeisureType(id, state.config.leisureTypes[id]));
+    const calA = await loadFromStorage('cal:A', null);
+    const calB = await loadFromStorage('cal:B', null);
+    const calC = await loadFromStorage('cal:C', null);
+    state.calendars.A = calA || defaultCalendarA();
+    state.calendars.B = calB || defaultCalendarA();
+    state.calendars.C = calC || defaultCalendarC();
+    const lu = await loadFromStorage('lastUsed', null);
+    if (lu && typeof lu === 'object') state.lastUsed = lu;
+  } catch (e) {
+    state.calendars.A = defaultCalendarA();
+    state.calendars.B = defaultCalendarA();
+    state.calendars.C = defaultCalendarC();
+  }
+  state.loaded = true;
+  renderConfig();
+  renderAll();
+})();
+</script>
+</body>
+</html>
